@@ -1,0 +1,970 @@
+{
+ "vault": "C:/beyin",
+ "generated_at": "2026-10-08T00:00:42.989Z",
+ "node_count": 214,
+ "edge_count": 130,
+ "unresolved": [
+  "Inbox/Dump/",
+  "Notlar/",
+  "actions",
+  "events",
+  "link_handlers",
+  "panes",
+  "receipts/00f212d6e6667991fa8f525c755e94701fac757c40abe364ee76b61e67581f95.md",
+  "receipts/02629e094350a5b96cb3dc96a8de1af60566f04641344e62bcda5b844cd0f3c0.md",
+  "receipts/02807d5412319f595c3e9a407ae4e3e590f8eefa0161105ca43643161c4065c4.md",
+  "receipts/04a4b9497897907fcf84fbecf67ce1d599d63d9f483521f09ac41adc999544bf.md",
+  "receipts/07b4b6c3ddddce55030949688fe02f8701b5e6003b6d89a240c1690960ff3a7b.md",
+  "receipts/07fa26793463e41a6c0b0497302b501a57089d731c05a298d96dba88c2c21999.md",
+  "receipts/0b61f0db245f313d6403c85bb4b1e24070cb50b266a4b3b8d6d90f8c52ca6988.md",
+  "receipts/0e06a112d4cc35c484c3755a73603e54570a83b3a480d5721e3b04646fc3f9e7.md",
+  "receipts/12549ef632613203f4d5779c45e08a2240f2463f082187adb8467f8d4507f399.md",
+  "receipts/1525030cb02e3236ed65ef0ccdda4f33c62aa5319dc873532df82fc712ad947d.md",
+  "receipts/154fdb5674f0598eae739fc6cae8a06f0826553640ba880991793caa957a8029.md",
+  "receipts/15f4f284bc3b29a86452c2b5fcf4d7cfd5845fa26a0c8e327eec095ac946e7a1.md",
+  "receipts/1cbc607cd48cd6151ccce80f0c5b66f4b8a7dcf0aa2a8b52a8b69f9f1f10dac0.md",
+  "receipts/1d8c4597d76400a96a571b6c67057caaf1637b1473af992fe67a7bf0cde3f106.md",
+  "receipts/1f85eb76797b82913242c7eff38386078af5479c9dc33a6d21e782fd56d6842e.md",
+  "receipts/22792b751d188722878fa2aa3ee393a229e66b460b44aebda043389da4d11ddb.md",
+  "receipts/2383b397fb53c2bd0844a48d81f83fd187771e3baebf77fdcfff4e2bd9efe32e.md",
+  "receipts/23c83487adff9a7f62447b2b03a7724f56a01986714f6d5fca4a22f43681ac15.md",
+  "receipts/242131b0d502ae9252a1e1a925377e1ea3637a3c3f8ebd3382007fa143ec8c4e.md",
+  "receipts/277ca0f14acb392f04f5030d88d8a6d513362028acb790adf2e29b267875ad4a.md",
+  "receipts/28305342b3396c4bb69b71b82f747363948b39f9d10cdfe9c32223e37cf65715.md",
+  "receipts/2a492cc5cf519debfcc58ed79797159e0d210d450822218830053b6674a027d7.md",
+  "receipts/2fb4c446810e53b845fb17e3588b01f5a65f4feeaa0dda99c62863c2b5419105.md",
+  "receipts/33d4433c06ad1255752e2410e02690fd3c7f5418db0c5b46068beecac96fb414.md",
+  "receipts/37ed9d7293a07f390abf971e567c3fd2f0221d1361fe1ee24b6ff88e4664efae.md",
+  "receipts/3a7d3a6cecff31822a45f216c0be9342a194e700ef88a37eca7d545eff67e8d0.md",
+  "receipts/3a8f0d4f2181bd764ad50c45dc1c08415c09b8e0a9dcb739a0de8f1da881aa7f.md",
+  "receipts/3b0c802f9f6e00143f525baa9fe820515c14f2040dbd40f451f03ead1a04a29b.md",
+  "receipts/3c59411d4154c4a6b872f0db3760510d5797cf315adb82622826d9a02f935ff2.md",
+  "receipts/42810ed8729575bd49ae187a87476d80ace472e0ea87933d7620c17c30700954.md",
+  "receipts/46d3fddfada41b6359d82b7fcc980928dee622cce297685a572d5759c5c236d1.md",
+  "receipts/475ed9a96e34072c63575c45fb7e32b81af3aa3e2386fbb936f11851cb3ddb61.md",
+  "receipts/4ae22e74fc32d56ff73236a6f9778be171f8ae70b4650c9600de8e5ce82f3042.md",
+  "receipts/4bd9333e139190b6b3974b70da237f1a2e7343b6e0496726be4d95e4a60d4b2c.md",
+  "receipts/4edf494bb10d1f2f1c5e5809699143db4ab69eb5c53adef84aff996e47a02b6d.md",
+  "receipts/513db13144c8670a9eb14ae5b34eda381dedfc0eff796706784dbc527949c603.md",
+  "receipts/58c2f5a27e94d57f9fe45a58ec115158c6d9e078cda691258c84317cc3039182.md",
+  "receipts/5a2b78344bd8a42dfcf7f270d131bf4b1d720eabf61f9832474911675011887e.md",
+  "receipts/5ff708a9437c1cfe24f9b2486bcad8c94d2c5ff93cc299a929b6007cd5b9c9cd.md",
+  "receipts/64414742b97e5d1d4d16182294ff41e4d3440513a58c7db44c6725ae540250e7.md",
+  "receipts/6e5bdec18b56c65fc5ec3b2165751866acbb4a4d2d1ff52350f56165fc617c85.md",
+  "receipts/75f431ee9e88dcb13dfcdf01c7cf2294bceefb50331e4c2aac7c9a94d4d9a2bf.md",
+  "receipts/7f14df4de9316a27f05b810b4bae04bc37584c0b8859334aeaf57fdf41914325.md",
+  "receipts/7fba9208e0e1893064b314c6da04e160844a7cf4b5b125bf8e61e6b303467b57.md",
+  "receipts/8720ae8d58a5ca4fc8f035b6dbd9ae60a65083c6adbbb6bffe9330b4c3e4c8b7.md",
+  "receipts/8edb50a12e80e71d3e7fc420947ab81002c560bdfbff84cb891ea35b8a00e0ea.md",
+  "receipts/93724cd02de937d684594d6873277413bd98e546a2ed125247fbb3ec707cc844.md",
+  "receipts/9478e6b14b9e38fb806e4d980509122e1b2005367146565d18f3126058df6ca8.md",
+  "receipts/9b99b7e2c19990e5f26fb5f9302ac1526a12b93ec23741642ce061e90d0a7f7b.md",
+  "receipts/9c65e6f6896672614e9a805e0515785be8777b8323aa3ed6d80c8351e7daf120.md",
+  "receipts/a132b00a1bec783221ee6fee50e3f6d7ee1bf4942813d51802b328057dd20bce.md",
+  "receipts/a7f0e0008c5fa19b821e96793ad3ef0ed2e633fc0559682a2fb718025ebf43bf.md",
+  "receipts/aa1df0e9d3038ae613bad2ea5c5be5f427143935f315e39cb0f8981c48722475.md",
+  "receipts/ab1a6171d35f5c66ff4539f2324955b8bdc5bfded9e70f167c706a463073f45c.md",
+  "receipts/abb4dcdda027509121b5480389930217dc914d693cdd4805d0b4b26152c7724a.md",
+  "receipts/b75faebcef0cbba4be6094a8f3755f6c7587fd97df1cdf00a9791471bd1848f7.md",
+  "receipts/bb4fad331c5dd5a12a5c296c8e7dbd0456e5b0540fda2f14b1b61ddb19cd51ac.md",
+  "receipts/c04df160a33b8b0967a6a98dbf20636fab4c1d9c1aaae4bbdf7757f968cd5ba5.md",
+  "receipts/c16119f4676c5916345af6689cd0949bc52993d599f7e321817096181102ef7b.md",
+  "receipts/c20ef54c70fc9f9c52c097c0c01e43b0a070e8357075cbd539ed3fa442dfa0be.md",
+  "receipts/c25fe4964cd018a72942f16a81183100397d459564c47873a7f4910158b3c09f.md",
+  "receipts/c44c4a6d7f67f982ebc7ef02ff9750d78c1cc389b4236e8101ac5cc093581d2c.md",
+  "receipts/c7af9d6438523f94be6876a7062bf2ee0ea332ec2c0a83ed35c09d0270a08ff8.md",
+  "receipts/cca70e064a5b7a0cb479213087bbdc942811666b6bbc7731104958d2265d85f2.md",
+  "receipts/ccc2065e7b828f28b502a5597417c5f81dfbe8f91db12d7626e92941bf0fde4c.md",
+  "receipts/ce105fb4f859c467b75cb4279ff51bec29339e9110cf46d6c37ca32379274567.md",
+  "receipts/cf277ba4ac8878166a54c991629e24728a01f757f6518e5f4997cbf718edc5a3.md",
+  "receipts/d20b474427a736828acf3c5898067536dbc4a376b0cc435005a266a215f4313c.md",
+  "receipts/d2993680d57e0edc55131633dfd026eed2b80f2ee8b5665f04a2a1e8aa86bfed.md",
+  "receipts/d35021c4c092e44a4c5f74d6e7416c54efc052503c96d222eb523ad5807705d1.md",
+  "receipts/d396b9b19a020f7a779c0835d4ce1a12350bcd75198d446441688cf56f53d1cf.md",
+  "receipts/d7dc81ddee5dfa52e287296a38f80f7d31bd37cf3e43e0fce8865cf8fb2d7606.md",
+  "receipts/d90b4cfcf73d2cc341c7123788492ef902964cc97f2340958a9169ae47a1247b.md",
+  "receipts/e45a361e119b32cb20b4f58ef02647f12c51e0985ca66728c1292e2310db67ee.md",
+  "receipts/e67858e39d442bbc92b7b102f60faf8eb0bc9ece4b1a8128acda81e05f0249cc.md",
+  "receipts/e6b96da43cd34dcb0c711942130251971f510f59bdcc2cb2dcda88bd6d9ec9d6.md",
+  "receipts/e86e79e28b119ea058d6622c078f7504757ac1badd3d8e6ef7cc16d875bedc8a.md",
+  "receipts/e95378a0ba25728b3259e87bdfd0f8c67d819f0f3ec09c508087e2edc807ecef.md",
+  "receipts/ea0b417044cdd5092dfa8459723c848614fb6bfa13c97fb84c5b53e3a5065a9e.md",
+  "receipts/eb2bc43bf6ac2f1a3c07ac12da708ce71c35438928cea49cd848909275f631df.md",
+  "receipts/edaf562c6dcef8317cae649a276c5a7c8de0b6c9ba1e14a62c4c14b4bbaddfe6.md",
+  "receipts/efd983287c797e940a594cd8f3910d662b81747c1f38a24a29830402ec685505.md",
+  "receipts/f116773bdf4da42d4626fe1917acb187c814275e452e14991df7f459a06e63c3.md",
+  "receipts/f4c2f5286e9614c001b4771e488a69e076139474c624295b66f16c2e413be7f2.md",
+  "receipts/f60f8a3db9eff0d695cb084d6e5211abba4f79475d0f5f2fada1de32ef854f71.md",
+  "receipts/fc7de9646f4e89148dd53692dd0e8bda48d43506fa520242c8b96329061bf654.md",
+  "receipts/fdbe7ea4266d30863d85cea3ba6abb5de62d01edb4bf14a67f86a26bd8e2f16e.md",
+  "wikilink"
+ ],
+ "nodes": [
+  "AGENTS.md",
+  "beyin/Companion/Core.md",
+  "beyin/Companion/Journal.md",
+  "beyin/Companion/Kurallar.md",
+  "beyin/Companion/Last-Session.md",
+  "beyin/Companion/Makineler.md",
+  "beyin/Companion/pc.md",
+  "beyin/Companion/Threads.md",
+  "beyin/Dashboard.md",
+  "beyin/knowledge/avenox-sifirdan-seri-ozet.md",
+  "beyin/knowledge/beyin-v3-kurulum.md",
+  "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+  "beyin/knowledge/concepts/ai-tasarim-is-akisi.md",
+  "beyin/knowledge/concepts/efor-seviyesi.md",
+  "beyin/knowledge/concepts/kalici-ajan.md",
+  "beyin/knowledge/concepts/konteks-uc-soru.md",
+  "beyin/knowledge/concepts/loop-muhendisligi.md",
+  "beyin/knowledge/concepts/mv-edit-preset-sahnesi.md",
+  "beyin/knowledge/concepts/prompt-diyeti.md",
+  "beyin/knowledge/concepts/skill-filosu.md",
+  "beyin/knowledge/concepts/skill-standartlari.md",
+  "beyin/knowledge/github-readme-srcset-virgul.md",
+  "beyin/knowledge/index.md",
+  "beyin/knowledge/metin-uretici-roadmap.md",
+  "beyin/knowledge/receipt-view-crlf-conflict.md",
+  "beyin/knowledge/trap-rapci-yol-haritasi.md",
+  "beyin/knowledge/voems-owner-handle.md",
+  "beyin/knowledge/voems-sosyal-modul.md",
+  "beyin/projects/ae-legacy-archive/Last-Session.md",
+  "beyin/projects/ae-legacy-archive/Proje.md",
+  "beyin/projects/ae-legacy-archive/Threads.md",
+  "beyin/projects/ae-legacy-archive/work/security-report.md",
+  "beyin/projects/ajans/knowledge/satinalinmis-hesap-rebrand.md",
+  "beyin/projects/ajans/Proje.md",
+  "beyin/projects/connectbox-mobile/daily/2026-09-15.md",
+  "beyin/projects/connectbox-mobile/daily/2026-09-17.md",
+  "beyin/projects/connectbox-mobile/knowledge/index.md",
+  "beyin/projects/connectbox-mobile/knowledge/log.md",
+  "beyin/projects/connectbox-mobile/Kurallar.md",
+  "beyin/projects/connectbox-mobile/Last-Session.md",
+  "beyin/projects/connectbox-mobile/Proje.md",
+  "beyin/projects/connectbox-mobile/Threads.md",
+  "beyin/projects/finos/gece-loop-prompt.md",
+  "beyin/projects/finos/knowledge/finans-app-arastirmasi-tur2.md",
+  "beyin/projects/finos/knowledge/finans-app-arastirmasi.md",
+  "beyin/projects/finos/Last-Session.md",
+  "beyin/projects/finos/Proje.md",
+  "beyin/projects/finos/Threads.md",
+  "beyin/projects/fitroom/Kurallar.md",
+  "beyin/projects/fitroom/Last-Session.md",
+  "beyin/projects/fitroom/Proje.md",
+  "beyin/projects/fitroom/Threads.md",
+  "beyin/projects/herdr/gece-loop-prompt.md",
+  "beyin/projects/herdr/knowledge/rekabet-bosluk-2026-10.md",
+  "beyin/projects/herdr/knowledge/roadmap.md",
+  "beyin/projects/herdr/lanes/s1-test.md",
+  "beyin/projects/herdr/lanes/s2-claude.md",
+  "beyin/projects/herdr/Last-Session.md",
+  "beyin/projects/herdr/Proje.md",
+  "beyin/projects/herdr/Threads.md",
+  "beyin/projects/newal/Last-Session.md",
+  "beyin/projects/newal/Proje.md",
+  "beyin/projects/newal/Threads.md",
+  "beyin/projects/project/Kurallar.md",
+  "beyin/projects/project/Last-Session.md",
+  "beyin/projects/project/Proje.md",
+  "beyin/projects/project/Threads.md",
+  "beyin/projects/scumind/knowledge/index.md",
+  "beyin/projects/scumind/knowledge/log.md",
+  "beyin/projects/scumind/Kurallar.md",
+  "beyin/projects/scumind/Last-Session.md",
+  "beyin/projects/scumind/Proje.md",
+  "beyin/projects/scumind/Threads.md",
+  "beyin/projects/studioos/daily/2026-09-15.md",
+  "beyin/projects/studioos/daily/2026-09-20.md",
+  "beyin/projects/studioos/knowledge/artistik-yol-haritasi.md",
+  "beyin/projects/studioos/knowledge/butce-modeli.md",
+  "beyin/projects/studioos/knowledge/deal-ve-telif-guvenligi.md",
+  "beyin/projects/studioos/knowledge/endustriye-giris-raporu.md",
+  "beyin/projects/studioos/knowledge/hazir-masa-arastirmasi.md",
+  "beyin/projects/studioos/knowledge/index.md",
+  "beyin/projects/studioos/knowledge/kimlik-evren-icerik-stratejisi.md",
+  "beyin/projects/studioos/knowledge/log.md",
+  "beyin/projects/studioos/knowledge/operasyon-kitabi.md",
+  "beyin/projects/studioos/knowledge/sarki-tempo-cekim-stratejisi.md",
+  "beyin/projects/studioos/knowledge/studio-led-yerlesim-plani.md",
+  "beyin/projects/studioos/knowledge/studyo-masasi-raporu.md",
+  "beyin/projects/studioos/knowledge/yol-haritasi-12-ay.md",
+  "beyin/projects/studioos/Kurallar.md",
+  "beyin/projects/studioos/Last-Session.md",
+  "beyin/projects/studioos/Proje.md",
+  "beyin/projects/studioos/Threads.md",
+  "beyin/projects/ucookie/Proje.md",
+  "beyin/projects/voems/knowledge/artist-brand-cards.md",
+  "beyin/projects/voems/Kurallar.md",
+  "beyin/projects/voems/Last-Session.md",
+  "beyin/projects/voems/Proje.md",
+  "beyin/projects/voems/Threads.md",
+  "beyin/projects/voesound/knowledge/marka-kimligi-arastirmasi.md",
+  "beyin/projects/voesound/knowledge/site-altyapi-arastirmasi.md",
+  "beyin/projects/voesound/knowledge/site-ve-mail-arastirmasi.md",
+  "beyin/projects/voesound/Kurallar.md",
+  "beyin/projects/voesound/Last-Session.md",
+  "beyin/projects/voesound/Proje.md",
+  "beyin/projects/voesound/Threads.md",
+  "beyin/Templates/Note.md",
+  "CLAUDE.md",
+  "daily/2026-09-14.md",
+  "daily/v3/2026-09-17.md",
+  "daily/v3/2026-09-18.md",
+  "daily/v3/2026-09-20.md",
+  "daily/v3/2026-09-21.md",
+  "daily/v3/2026-09-22.md",
+  "daily/v3/2026-09-23.md",
+  "daily/v3/2026-09-24.md",
+  "daily/v3/2026-09-25.md",
+  "daily/v3/2026-09-26.md",
+  "daily/v3/2026-09-27.md",
+  "daily/v3/2026-09-29.md",
+  "daily/v3/2026-09-30.md",
+  "daily/v3/2026-10-03.md",
+  "daily/v3/2026-10-05.md",
+  "daily/v3/2026-10-06.md",
+  "daily/v3/2026-10-07.md",
+  "GEMINI.md",
+  "knowledge/v3/outcomes.md",
+  "receipts/00f212d6e6667991fa8f525c755e94701fac757c40abe364ee76b61e67581f95.md",
+  "receipts/02629e094350a5b96cb3dc96a8de1af60566f04641344e62bcda5b844cd0f3c0.md",
+  "receipts/02807d5412319f595c3e9a407ae4e3e590f8eefa0161105ca43643161c4065c4.md",
+  "receipts/04a4b9497897907fcf84fbecf67ce1d599d63d9f483521f09ac41adc999544bf.md",
+  "receipts/07b4b6c3ddddce55030949688fe02f8701b5e6003b6d89a240c1690960ff3a7b.md",
+  "receipts/07fa26793463e41a6c0b0497302b501a57089d731c05a298d96dba88c2c21999.md",
+  "receipts/0b61f0db245f313d6403c85bb4b1e24070cb50b266a4b3b8d6d90f8c52ca6988.md",
+  "receipts/0e06a112d4cc35c484c3755a73603e54570a83b3a480d5721e3b04646fc3f9e7.md",
+  "receipts/12549ef632613203f4d5779c45e08a2240f2463f082187adb8467f8d4507f399.md",
+  "receipts/1525030cb02e3236ed65ef0ccdda4f33c62aa5319dc873532df82fc712ad947d.md",
+  "receipts/154fdb5674f0598eae739fc6cae8a06f0826553640ba880991793caa957a8029.md",
+  "receipts/15f4f284bc3b29a86452c2b5fcf4d7cfd5845fa26a0c8e327eec095ac946e7a1.md",
+  "receipts/1cbc607cd48cd6151ccce80f0c5b66f4b8a7dcf0aa2a8b52a8b69f9f1f10dac0.md",
+  "receipts/1d8c4597d76400a96a571b6c67057caaf1637b1473af992fe67a7bf0cde3f106.md",
+  "receipts/1f85eb76797b82913242c7eff38386078af5479c9dc33a6d21e782fd56d6842e.md",
+  "receipts/22792b751d188722878fa2aa3ee393a229e66b460b44aebda043389da4d11ddb.md",
+  "receipts/2383b397fb53c2bd0844a48d81f83fd187771e3baebf77fdcfff4e2bd9efe32e.md",
+  "receipts/23c83487adff9a7f62447b2b03a7724f56a01986714f6d5fca4a22f43681ac15.md",
+  "receipts/242131b0d502ae9252a1e1a925377e1ea3637a3c3f8ebd3382007fa143ec8c4e.md",
+  "receipts/277ca0f14acb392f04f5030d88d8a6d513362028acb790adf2e29b267875ad4a.md",
+  "receipts/28305342b3396c4bb69b71b82f747363948b39f9d10cdfe9c32223e37cf65715.md",
+  "receipts/2a492cc5cf519debfcc58ed79797159e0d210d450822218830053b6674a027d7.md",
+  "receipts/2fb4c446810e53b845fb17e3588b01f5a65f4feeaa0dda99c62863c2b5419105.md",
+  "receipts/33d4433c06ad1255752e2410e02690fd3c7f5418db0c5b46068beecac96fb414.md",
+  "receipts/37ed9d7293a07f390abf971e567c3fd2f0221d1361fe1ee24b6ff88e4664efae.md",
+  "receipts/3a7d3a6cecff31822a45f216c0be9342a194e700ef88a37eca7d545eff67e8d0.md",
+  "receipts/3a8f0d4f2181bd764ad50c45dc1c08415c09b8e0a9dcb739a0de8f1da881aa7f.md",
+  "receipts/3b0c802f9f6e00143f525baa9fe820515c14f2040dbd40f451f03ead1a04a29b.md",
+  "receipts/3c59411d4154c4a6b872f0db3760510d5797cf315adb82622826d9a02f935ff2.md",
+  "receipts/42810ed8729575bd49ae187a87476d80ace472e0ea87933d7620c17c30700954.md",
+  "receipts/46d3fddfada41b6359d82b7fcc980928dee622cce297685a572d5759c5c236d1.md",
+  "receipts/475ed9a96e34072c63575c45fb7e32b81af3aa3e2386fbb936f11851cb3ddb61.md",
+  "receipts/4ae22e74fc32d56ff73236a6f9778be171f8ae70b4650c9600de8e5ce82f3042.md",
+  "receipts/4bd9333e139190b6b3974b70da237f1a2e7343b6e0496726be4d95e4a60d4b2c.md",
+  "receipts/4edf494bb10d1f2f1c5e5809699143db4ab69eb5c53adef84aff996e47a02b6d.md",
+  "receipts/513db13144c8670a9eb14ae5b34eda381dedfc0eff796706784dbc527949c603.md",
+  "receipts/58c2f5a27e94d57f9fe45a58ec115158c6d9e078cda691258c84317cc3039182.md",
+  "receipts/5a2b78344bd8a42dfcf7f270d131bf4b1d720eabf61f9832474911675011887e.md",
+  "receipts/5ff708a9437c1cfe24f9b2486bcad8c94d2c5ff93cc299a929b6007cd5b9c9cd.md",
+  "receipts/64414742b97e5d1d4d16182294ff41e4d3440513a58c7db44c6725ae540250e7.md",
+  "receipts/6e5bdec18b56c65fc5ec3b2165751866acbb4a4d2d1ff52350f56165fc617c85.md",
+  "receipts/75f431ee9e88dcb13dfcdf01c7cf2294bceefb50331e4c2aac7c9a94d4d9a2bf.md",
+  "receipts/7f14df4de9316a27f05b810b4bae04bc37584c0b8859334aeaf57fdf41914325.md",
+  "receipts/7fba9208e0e1893064b314c6da04e160844a7cf4b5b125bf8e61e6b303467b57.md",
+  "receipts/8720ae8d58a5ca4fc8f035b6dbd9ae60a65083c6adbbb6bffe9330b4c3e4c8b7.md",
+  "receipts/8edb50a12e80e71d3e7fc420947ab81002c560bdfbff84cb891ea35b8a00e0ea.md",
+  "receipts/93724cd02de937d684594d6873277413bd98e546a2ed125247fbb3ec707cc844.md",
+  "receipts/9478e6b14b9e38fb806e4d980509122e1b2005367146565d18f3126058df6ca8.md",
+  "receipts/9b99b7e2c19990e5f26fb5f9302ac1526a12b93ec23741642ce061e90d0a7f7b.md",
+  "receipts/9c65e6f6896672614e9a805e0515785be8777b8323aa3ed6d80c8351e7daf120.md",
+  "receipts/a132b00a1bec783221ee6fee50e3f6d7ee1bf4942813d51802b328057dd20bce.md",
+  "receipts/a7f0e0008c5fa19b821e96793ad3ef0ed2e633fc0559682a2fb718025ebf43bf.md",
+  "receipts/aa1df0e9d3038ae613bad2ea5c5be5f427143935f315e39cb0f8981c48722475.md",
+  "receipts/ab1a6171d35f5c66ff4539f2324955b8bdc5bfded9e70f167c706a463073f45c.md",
+  "receipts/abb4dcdda027509121b5480389930217dc914d693cdd4805d0b4b26152c7724a.md",
+  "receipts/b75faebcef0cbba4be6094a8f3755f6c7587fd97df1cdf00a9791471bd1848f7.md",
+  "receipts/bb4fad331c5dd5a12a5c296c8e7dbd0456e5b0540fda2f14b1b61ddb19cd51ac.md",
+  "receipts/c04df160a33b8b0967a6a98dbf20636fab4c1d9c1aaae4bbdf7757f968cd5ba5.md",
+  "receipts/c16119f4676c5916345af6689cd0949bc52993d599f7e321817096181102ef7b.md",
+  "receipts/c20ef54c70fc9f9c52c097c0c01e43b0a070e8357075cbd539ed3fa442dfa0be.md",
+  "receipts/c25fe4964cd018a72942f16a81183100397d459564c47873a7f4910158b3c09f.md",
+  "receipts/c44c4a6d7f67f982ebc7ef02ff9750d78c1cc389b4236e8101ac5cc093581d2c.md",
+  "receipts/c7af9d6438523f94be6876a7062bf2ee0ea332ec2c0a83ed35c09d0270a08ff8.md",
+  "receipts/cca70e064a5b7a0cb479213087bbdc942811666b6bbc7731104958d2265d85f2.md",
+  "receipts/ccc2065e7b828f28b502a5597417c5f81dfbe8f91db12d7626e92941bf0fde4c.md",
+  "receipts/ce105fb4f859c467b75cb4279ff51bec29339e9110cf46d6c37ca32379274567.md",
+  "receipts/cf277ba4ac8878166a54c991629e24728a01f757f6518e5f4997cbf718edc5a3.md",
+  "receipts/d20b474427a736828acf3c5898067536dbc4a376b0cc435005a266a215f4313c.md",
+  "receipts/d2993680d57e0edc55131633dfd026eed2b80f2ee8b5665f04a2a1e8aa86bfed.md",
+  "receipts/d35021c4c092e44a4c5f74d6e7416c54efc052503c96d222eb523ad5807705d1.md",
+  "receipts/d396b9b19a020f7a779c0835d4ce1a12350bcd75198d446441688cf56f53d1cf.md",
+  "receipts/d7dc81ddee5dfa52e287296a38f80f7d31bd37cf3e43e0fce8865cf8fb2d7606.md",
+  "receipts/d90b4cfcf73d2cc341c7123788492ef902964cc97f2340958a9169ae47a1247b.md",
+  "receipts/e45a361e119b32cb20b4f58ef02647f12c51e0985ca66728c1292e2310db67ee.md",
+  "receipts/e67858e39d442bbc92b7b102f60faf8eb0bc9ece4b1a8128acda81e05f0249cc.md",
+  "receipts/e6b96da43cd34dcb0c711942130251971f510f59bdcc2cb2dcda88bd6d9ec9d6.md",
+  "receipts/e86e79e28b119ea058d6622c078f7504757ac1badd3d8e6ef7cc16d875bedc8a.md",
+  "receipts/e95378a0ba25728b3259e87bdfd0f8c67d819f0f3ec09c508087e2edc807ecef.md",
+  "receipts/ea0b417044cdd5092dfa8459723c848614fb6bfa13c97fb84c5b53e3a5065a9e.md",
+  "receipts/eb2bc43bf6ac2f1a3c07ac12da708ce71c35438928cea49cd848909275f631df.md",
+  "receipts/edaf562c6dcef8317cae649a276c5a7c8de0b6c9ba1e14a62c4c14b4bbaddfe6.md",
+  "receipts/efd983287c797e940a594cd8f3910d662b81747c1f38a24a29830402ec685505.md",
+  "receipts/f116773bdf4da42d4626fe1917acb187c814275e452e14991df7f459a06e63c3.md",
+  "receipts/f4c2f5286e9614c001b4771e488a69e076139474c624295b66f16c2e413be7f2.md",
+  "receipts/f60f8a3db9eff0d695cb084d6e5211abba4f79475d0f5f2fada1de32ef854f71.md",
+  "receipts/fc7de9646f4e89148dd53692dd0e8bda48d43506fa520242c8b96329061bf654.md",
+  "receipts/fdbe7ea4266d30863d85cea3ba6abb5de62d01edb4bf14a67f86a26bd8e2f16e.md",
+  "tools/KULLANIM-KILAVUZU.md"
+ ],
+ "edges": [
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/Companion/Core.md",
+   "label": "Echo"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/Companion/pc.md",
+   "label": "pc"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/Companion/Kurallar.md",
+   "label": "Kurallar"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/connectbox-mobile/Kurallar.md",
+   "label": "Kurallar"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/fitroom/Kurallar.md",
+   "label": "Kurallar"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/project/Kurallar.md",
+   "label": "Kurallar"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/scumind/Kurallar.md",
+   "label": "Kurallar"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/studioos/Kurallar.md",
+   "label": "Kurallar"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/voems/Kurallar.md",
+   "label": "Kurallar"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/voesound/Kurallar.md",
+   "label": "Kurallar"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/Companion/Last-Session.md",
+   "label": "Son oturum"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/ae-legacy-archive/Last-Session.md",
+   "label": "Son oturum"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/connectbox-mobile/Last-Session.md",
+   "label": "Son oturum"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/finos/Last-Session.md",
+   "label": "Son oturum"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/fitroom/Last-Session.md",
+   "label": "Son oturum"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/herdr/Last-Session.md",
+   "label": "Son oturum"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/newal/Last-Session.md",
+   "label": "Son oturum"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/project/Last-Session.md",
+   "label": "Son oturum"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/scumind/Last-Session.md",
+   "label": "Son oturum"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/studioos/Last-Session.md",
+   "label": "Son oturum"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/voems/Last-Session.md",
+   "label": "Son oturum"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/voesound/Last-Session.md",
+   "label": "Son oturum"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/Companion/Threads.md",
+   "label": "Açık işler"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/ae-legacy-archive/Threads.md",
+   "label": "Açık işler"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/connectbox-mobile/Threads.md",
+   "label": "Açık işler"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/finos/Threads.md",
+   "label": "Açık işler"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/fitroom/Threads.md",
+   "label": "Açık işler"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/herdr/Threads.md",
+   "label": "Açık işler"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/newal/Threads.md",
+   "label": "Açık işler"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/project/Threads.md",
+   "label": "Açık işler"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/scumind/Threads.md",
+   "label": "Açık işler"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/studioos/Threads.md",
+   "label": "Açık işler"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/voems/Threads.md",
+   "label": "Açık işler"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/voesound/Threads.md",
+   "label": "Açık işler"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/knowledge/index.md",
+   "label": "Kişisel bilgi tabanı"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/connectbox-mobile/knowledge/index.md",
+   "label": "Kişisel bilgi tabanı"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/scumind/knowledge/index.md",
+   "label": "Kişisel bilgi tabanı"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/studioos/knowledge/index.md",
+   "label": "Kişisel bilgi tabanı"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/ae-legacy-archive/Proje.md",
+   "label": "connectbox-mobile"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/ajans/Proje.md",
+   "label": "connectbox-mobile"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/connectbox-mobile/Proje.md",
+   "label": "connectbox-mobile"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/finos/Proje.md",
+   "label": "connectbox-mobile"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/fitroom/Proje.md",
+   "label": "connectbox-mobile"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/herdr/Proje.md",
+   "label": "connectbox-mobile"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/newal/Proje.md",
+   "label": "connectbox-mobile"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/project/Proje.md",
+   "label": "connectbox-mobile"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/scumind/Proje.md",
+   "label": "connectbox-mobile"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/studioos/Proje.md",
+   "label": "connectbox-mobile"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/ucookie/Proje.md",
+   "label": "connectbox-mobile"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/voems/Proje.md",
+   "label": "connectbox-mobile"
+  },
+  {
+   "from": "beyin/Dashboard.md",
+   "to": "beyin/projects/voesound/Proje.md",
+   "label": "connectbox-mobile"
+  },
+  {
+   "from": "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+   "to": "beyin/knowledge/concepts/kalici-ajan.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+   "to": "beyin/knowledge/concepts/efor-seviyesi.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+   "to": "beyin/knowledge/concepts/prompt-diyeti.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+   "to": "beyin/knowledge/concepts/skill-standartlari.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+   "to": "beyin/knowledge/concepts/efor-seviyesi.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+   "to": "beyin/knowledge/concepts/loop-muhendisligi.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+   "to": "beyin/knowledge/concepts/loop-muhendisligi.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+   "to": "beyin/knowledge/concepts/efor-seviyesi.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+   "to": "beyin/knowledge/concepts/kalici-ajan.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+   "to": "beyin/knowledge/beyin-v3-kurulum.md",
+   "label": "ikinci-beyin"
+  },
+  {
+   "from": "beyin/knowledge/concepts/ai-tasarim-is-akisi.md",
+   "to": "beyin/knowledge/concepts/skill-standartlari.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/efor-seviyesi.md",
+   "to": "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/efor-seviyesi.md",
+   "to": "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/konteks-uc-soru.md",
+   "to": "beyin/knowledge/concepts/prompt-diyeti.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/konteks-uc-soru.md",
+   "to": "beyin/knowledge/concepts/prompt-diyeti.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/konteks-uc-soru.md",
+   "to": "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/konteks-uc-soru.md",
+   "to": "beyin/knowledge/avenox-sifirdan-seri-ozet.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/loop-muhendisligi.md",
+   "to": "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/loop-muhendisligi.md",
+   "to": "beyin/knowledge/concepts/ai-tasarim-is-akisi.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/loop-muhendisligi.md",
+   "to": "beyin/knowledge/concepts/skill-standartlari.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/loop-muhendisligi.md",
+   "to": "beyin/knowledge/concepts/konteks-uc-soru.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/prompt-diyeti.md",
+   "to": "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/prompt-diyeti.md",
+   "to": "beyin/knowledge/concepts/skill-standartlari.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/prompt-diyeti.md",
+   "to": "beyin/knowledge/concepts/konteks-uc-soru.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/skill-filosu.md",
+   "to": "beyin/knowledge/concepts/loop-muhendisligi.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/skill-filosu.md",
+   "to": "beyin/knowledge/concepts/skill-standartlari.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/skill-filosu.md",
+   "to": "beyin/knowledge/concepts/ai-tasarim-is-akisi.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/skill-filosu.md",
+   "to": "beyin/knowledge/concepts/loop-muhendisligi.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/skill-filosu.md",
+   "to": "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/skill-standartlari.md",
+   "to": "beyin/knowledge/concepts/prompt-diyeti.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/skill-standartlari.md",
+   "to": "beyin/knowledge/concepts/prompt-diyeti.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/concepts/skill-standartlari.md",
+   "to": "beyin/knowledge/concepts/ai-ajan-mimarisi.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/index.md",
+   "to": "beyin/knowledge/receipt-view-crlf-conflict.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/index.md",
+   "to": "beyin/knowledge/metin-uretici-roadmap.md",
+   "label": null
+  },
+  {
+   "from": "beyin/knowledge/index.md",
+   "to": "beyin/knowledge/concepts/mv-edit-preset-sahnesi.md",
+   "label": null
+  },
+  {
+   "from": "beyin/projects/connectbox-mobile/Proje.md",
+   "to": "beyin/knowledge/index.md",
+   "label": "bilgi indeksi"
+  },
+  {
+   "from": "beyin/projects/connectbox-mobile/Proje.md",
+   "to": "beyin/projects/connectbox-mobile/knowledge/index.md",
+   "label": "bilgi indeksi"
+  },
+  {
+   "from": "beyin/projects/connectbox-mobile/Proje.md",
+   "to": "beyin/projects/scumind/knowledge/index.md",
+   "label": "bilgi indeksi"
+  },
+  {
+   "from": "beyin/projects/connectbox-mobile/Proje.md",
+   "to": "beyin/projects/studioos/knowledge/index.md",
+   "label": "bilgi indeksi"
+  },
+  {
+   "from": "beyin/projects/connectbox-mobile/Proje.md",
+   "to": "beyin/Companion/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/connectbox-mobile/Proje.md",
+   "to": "beyin/projects/ae-legacy-archive/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/connectbox-mobile/Proje.md",
+   "to": "beyin/projects/connectbox-mobile/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/connectbox-mobile/Proje.md",
+   "to": "beyin/projects/finos/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/connectbox-mobile/Proje.md",
+   "to": "beyin/projects/fitroom/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/connectbox-mobile/Proje.md",
+   "to": "beyin/projects/herdr/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/connectbox-mobile/Proje.md",
+   "to": "beyin/projects/newal/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/connectbox-mobile/Proje.md",
+   "to": "beyin/projects/project/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/connectbox-mobile/Proje.md",
+   "to": "beyin/projects/scumind/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/connectbox-mobile/Proje.md",
+   "to": "beyin/projects/studioos/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/connectbox-mobile/Proje.md",
+   "to": "beyin/projects/voems/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/connectbox-mobile/Proje.md",
+   "to": "beyin/projects/voesound/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/scumind/Proje.md",
+   "to": "beyin/Companion/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/scumind/Proje.md",
+   "to": "beyin/projects/ae-legacy-archive/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/scumind/Proje.md",
+   "to": "beyin/projects/connectbox-mobile/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/scumind/Proje.md",
+   "to": "beyin/projects/finos/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/scumind/Proje.md",
+   "to": "beyin/projects/fitroom/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/scumind/Proje.md",
+   "to": "beyin/projects/herdr/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/scumind/Proje.md",
+   "to": "beyin/projects/newal/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/scumind/Proje.md",
+   "to": "beyin/projects/project/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/scumind/Proje.md",
+   "to": "beyin/projects/scumind/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/scumind/Proje.md",
+   "to": "beyin/projects/studioos/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/scumind/Proje.md",
+   "to": "beyin/projects/voems/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/scumind/Proje.md",
+   "to": "beyin/projects/voesound/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/studioos/Proje.md",
+   "to": "beyin/knowledge/index.md",
+   "label": "bilgi indeksi"
+  },
+  {
+   "from": "beyin/projects/studioos/Proje.md",
+   "to": "beyin/projects/connectbox-mobile/knowledge/index.md",
+   "label": "bilgi indeksi"
+  },
+  {
+   "from": "beyin/projects/studioos/Proje.md",
+   "to": "beyin/projects/scumind/knowledge/index.md",
+   "label": "bilgi indeksi"
+  },
+  {
+   "from": "beyin/projects/studioos/Proje.md",
+   "to": "beyin/projects/studioos/knowledge/index.md",
+   "label": "bilgi indeksi"
+  },
+  {
+   "from": "beyin/projects/studioos/Proje.md",
+   "to": "beyin/Companion/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/studioos/Proje.md",
+   "to": "beyin/projects/ae-legacy-archive/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/studioos/Proje.md",
+   "to": "beyin/projects/connectbox-mobile/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/studioos/Proje.md",
+   "to": "beyin/projects/finos/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/studioos/Proje.md",
+   "to": "beyin/projects/fitroom/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/studioos/Proje.md",
+   "to": "beyin/projects/herdr/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/studioos/Proje.md",
+   "to": "beyin/projects/newal/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/studioos/Proje.md",
+   "to": "beyin/projects/project/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/studioos/Proje.md",
+   "to": "beyin/projects/scumind/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/studioos/Proje.md",
+   "to": "beyin/projects/studioos/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/studioos/Proje.md",
+   "to": "beyin/projects/voems/Threads.md",
+   "label": "Threads"
+  },
+  {
+   "from": "beyin/projects/studioos/Proje.md",
+   "to": "beyin/projects/voesound/Threads.md",
+   "label": "Threads"
+  }
+ ]
+}

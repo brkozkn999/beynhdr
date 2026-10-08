@@ -1,0 +1,17 @@
+{
+  "version": "0.1.0",
+  "source": "beyn.notify",
+  "updated_at": "2026-10-08T00:32:58.349Z",
+  "agents": {
+    "w1:p1": {
+      "status": "idle",
+      "agent": "pi",
+      "ts": 1791419578332
+    },
+    "w2:p1": {
+      "status": "done",
+      "agent": "pi",
+      "ts": 1791419578349
+    }
+  }
+}

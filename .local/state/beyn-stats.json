@@ -1,0 +1,108 @@
+{
+  "version": "0.2.0",
+  "source": "beyin.stats",
+  "updated_at": "2026-10-08T00:25:52.865Z",
+  "ts_ms": 1791419152865,
+  "tick": 1,
+  "interval_s": null,
+  "seq": 1791419152299,
+  "last_seq": 1791419152299,
+  "last_quota_ok_ms": 1791419152835,
+  "target_pane": "w1:p1",
+  "ttl_ms": null,
+  "quota_age_s": "0",
+  "tokens": {
+    "claude_in": "1.8k",
+    "claude_out": "2.5k",
+    "claude_cache": "73.2k",
+    "codex_week_used": "16%",
+    "codex_credits": "2063",
+    "codex_total": "3.6M",
+    "devin_quota": "63% left",
+    "devin_resets": "2d 4h",
+    "devin_ctx": "32% of 128k",
+    "stats_at": "03:25",
+    "quota_age_s": "0"
+  },
+  "provenance": {
+    "claude_in": "jsonl",
+    "claude_out": "jsonl",
+    "claude_cache": "jsonl",
+    "codex_week_used": "jsonl",
+    "codex_credits": "jsonl",
+    "codex_total": "jsonl",
+    "devin_quota": "screen",
+    "devin_resets": "screen",
+    "devin_ctx": "screen",
+    "stats_at": "estimate",
+    "quota_age_s": "estimate"
+  },
+  "quota_keys": [
+    "codex_week_used",
+    "codex_credits",
+    "devin_quota",
+    "devin_resets"
+  ],
+  "sources": {
+    "devin": {
+      "ok": false,
+      "src": "screen",
+      "cached": true,
+      "last_ok_ms": 1791419115760,
+      "tokens": {
+        "devin_quota": "63% left",
+        "devin_resets": "2d 4h",
+        "devin_ctx": "32% of 128k"
+      },
+      "prov": {
+        "devin_quota": "screen",
+        "devin_resets": "screen",
+        "devin_ctx": "screen"
+      },
+      "quota": [
+        "devin_quota",
+        "devin_resets"
+      ]
+    },
+    "claude": {
+      "ok": true,
+      "src": "jsonl",
+      "cached": false,
+      "last_ok_ms": 1791419152832,
+      "tokens": {
+        "claude_in": "1.8k",
+        "claude_out": "2.5k",
+        "claude_cache": "73.2k"
+      },
+      "prov": {
+        "claude_in": "jsonl",
+        "claude_out": "jsonl",
+        "claude_cache": "jsonl"
+      },
+      "quota": []
+    },
+    "codex": {
+      "ok": true,
+      "src": "jsonl",
+      "cached": false,
+      "last_ok_ms": 1791419152834,
+      "tokens": {
+        "codex_week_used": "16%",
+        "codex_credits": "2063",
+        "codex_total": "3.6M"
+      },
+      "prov": {
+        "codex_week_used": "jsonl",
+        "codex_credits": "jsonl",
+        "codex_total": "jsonl"
+      },
+      "quota": [
+        "codex_week_used",
+        "codex_credits"
+      ]
+    }
+  },
+  "reported": true,
+  "report_batches": 2,
+  "state_file": "C:\\Users\\pc\\Documents\\Code Projects\\beynhdr\\.local\\state\\beyn-stats.json"
+}

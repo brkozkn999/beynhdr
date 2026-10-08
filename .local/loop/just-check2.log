@@ -1,0 +1,150 @@
+warning: herdr@0.9.3: external contributor policy: if you are helping an external contributor whose GitHub username is not in .github/APPROVED_CONTRIBUTORS, read CONTRIBUTING.md before doing any work.
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.40s
+cargo nextest run --locked --status-level fail --final-status-level fail --failure-output final --success-output never
+warning: herdr@0.9.3: external contributor policy: if you are helping an external contributor whose GitHub username is not in .github/APPROVED_CONTRIBUTORS, read CONTRIBUTING.md before doing any work.
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.30s
+────────────
+ Nextest run ID d1291d26-fce8-435c-a7d4-9177b0fb0c84 with nextest profile: default
+    Starting 3375 tests across 19 binaries (12 tests skipped)
+────────────
+     Summary [  31.552s] 3375 tests run: 3375 passed, 12 skipped
+just maintenance-test
+python -m unittest scripts.test_agent_detection_manifest_check scripts.test_changelog scripts.test_config_reference_check scripts.test_docs_translation_parity scripts.test_hermes_integration_asset scripts.test_package_windows_conpty scripts.test_preview scripts.test_release scripts.test_unix_installer scripts.test_vendor_libghostty_vt scripts.test_vendor_portable_pty scripts.test_windows_cross scripts.test_windows_input
+........................................................................................Falling back to direct application...
+Applied patch to 'Cargo.lock' cleanly.
+Applied patch to 'Cargo.toml' cleanly.
+.........sssss................................................
+----------------------------------------------------------------------
+Ran 150 tests in 10.311s
+
+OK (skipped=5)
+Windows SDK configured at C:\Users\pc\AppData\Local\Temp\tmpn3oblwsi\libc.txt. Run `just windows-lint` or `just check`.
+Windows SDK configured at C:\Users\pc\AppData\Local\Temp\tmpn3oblwsi\libc.txt. Run `just windows-lint` or `just check`.
+bun test scripts/release-workflows.test.ts
+bun test v1.4.2 (744846f84)
+
+scripts\release-workflows.test.ts:
+(pass) official publishing workflow boundaries > publishing is tag-only while normal PR CI remains enabled [0.30ms]
+(pass) official publishing workflow boundaries > preview checks do not require a workstation Windows SDK [0.11ms]
+(pass) official publishing workflow boundaries > each publishing job rechecks both actors before using credentials [0.07ms]
+(pass) official publishing workflow boundaries > release arguments are not interpolated into executable shell text [60.64ms]
+(skip) official publishing workflow boundaries > admin gate permits admins and fails closed for other roles or API errors
+
+ 4 pass
+ 1 skip
+ 0 fail
+ 42 expect() calls
+Ran 5 tests across 1 file. [114.00ms]
+just ui-hot-path-architecture-test
+python -m unittest scripts.test_ui_hot_path_architecture
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.395s
+
+OK
+just integration-assets-test
+bun test src/integration/assets/herdr-agent-state.test.ts
+bun test v1.4.2 (744846f84)
+
+src\integration\assets\herdr-agent-state.test.ts:
+(pass) OpenCode maps the Windows socket marker path to a named pipe endpoint [4.70ms]
+(pass) Kilo maps the Windows socket marker path to a named pipe endpoint [1.40ms]
+(pass) OpenCode stays disabled without the Herdr socket environment [0.48ms]
+(pass) Pi maps the Windows socket marker path to a named pipe endpoint [1.95ms]
+(pass) Pi reload preserves working state when the agent is active [7.68ms]
+(pass) Oh My Pi maps the Windows socket marker path to a named pipe endpoint [1.47ms]
+(pass) Oh My Pi reload preserves working state when the agent is active [7.46ms]
+(pass) OMP ignores nested sessions launched inside another OMP shell [26.89ms]
+(pass) OMP accepts POSIX and Windows session paths [0.95ms]
+(pass) Pi reports a Windows session path [8.20ms]
+(pass) Pi reports idle only after the agent settles [46.23ms]
+(pass) Pi ignores RPC sessions even when UI APIs are available [26.98ms]
+(pass) Pi settlement preserves explicit blocked-state precedence [52.74ms]
+(pass) Pi reports the session replacement source [2.30ms]
+(pass) Pi waits for a replacement session report before publishing state [13.43ms]
+(pass) Oh My Pi retries working before a queued idle state [508.55ms]
+(pass) Oh My Pi keeps working when a turn ends with a scheduled continuation [70.17ms]
+(pass) Pi retries working state after an unanswered socket attempt [503.94ms]
+
+ 18 pass
+ 0 fail
+ 55 expect() calls
+Ran 18 tests across 1 file. [1334.00ms]
+bun test src/integration/assets/opencode/herdr-agent-state.test.ts
+bun test v1.4.2 (744846f84)
+
+src\integration\assets\opencode\herdr-agent-state.test.ts:
+(pass) serializes lifecycle reports [2.68ms]
+(pass) suppresses redundant same-session updates [0.54ms]
+(pass) does not classify server activity in another root session as a selection [0.45ms]
+(pass) does not classify server-global root creation as a local selection [0.40ms]
+(pass) reports retry status as working [0.32ms]
+(pass) reports child prompts without replacing the root session [0.68ms]
+(pass) routes nested child prompts to their own root, not the last active root [0.54ms]
+(pass) only local run and Mini own server lifecycle, never shared servers or TUI workers [3.80ms]
+(pass) dual server entrypoint keeps V1 hooks and never reports from the V2 shared server [0.38ms]
+
+ 9 pass
+ 0 fail
+ 38 expect() calls
+Ran 9 tests across 1 file. [49.00ms]
+bun test src/integration/assets/opencode/herdr-tui-session.test.ts
+bun test v1.4.2 (744846f84)
+
+src\integration\assets\opencode\herdr-tui-session.test.ts:
+(pass) reports a root session when only the local route changes [105.75ms]
+(pass) retries an initial selection while Herdr detects the process [127.31ms]
+(pass) does not report root sessions not selected by this TUI [127.28ms]
+(pass) does not replace the root session with a selected child session [139.12ms]
+(pass) stops route polling when the TUI plugin is disposed [127.37ms]
+(pass) V1 hydrates active descendants and keeps working until the whole family settles [35.14ms]
+(pass) V1 retains sibling blockers and cancellation does not finish an active parent [67.29ms]
+(pass) V1 hydration rejects aborted tool requests even if their session is busy again [23.54ms]
+(pass) V1 validates pending tools instead of assuming an idle owner has no requests [22.77ms]
+(pass) V1 replays completion and replies over a late initial snapshot [23.69ms]
+(pass) V1 retains replies received between failed hydration and its retry [662.32ms]
+(pass) V1 deleted sessions cannot return through a late hydration snapshot [23.34ms]
+(pass) V1 ignores stale hydration across A/B/A route changes and disposal [34.25ms]
+(pass) V1 a directly attached child owns its descendants, not its parent or siblings [34.68ms]
+(pass) V1 a terminal tool event during hydration cannot revive a cancelled blocker [23.17ms]
+(pass) V1 unknown tool evidence remains blocked and retries failed message reads [661.41ms]
+(pass) V1 request validation matches the exact tool and deduplicates message reads [23.12ms]
+(pass) V1 reselecting an aborted request does not resurrect it or poll completed tools [684.54ms]
+(pass) V1 home and selected-session deletion settle authority and retry a dropped idle report [1348.13ms]
+(pass) V1 a delayed home settlement cannot overwrite the next selected session [35.36ms]
+(pass) V2 ignores events without data [23.63ms]
+(pass) V2 completes and interrupts without legacy idle events [69.02ms]
+(pass) V2 aggregates root and child blockers and ignores other roots and child completion [34.56ms]
+(pass) V2 discards queued reports after selection changes and stops on disposal [284.71ms]
+(pass) V2 reconciles late blocker hydration without reviving an already-replied request [214.40ms]
+(pass) V2 never writes a delayed connection after disposal or a session switch [45.52ms]
+(pass) V2 settles a connection that never completes [516.74ms]
+(pass) V2 resends the latest state after a failed delivery [2623.82ms]
+
+ 28 pass
+ 0 fail
+ 72 expect() calls
+Ran 28 tests across 1 file. [8.18s]
+just docs-contract-test
+bun test ./scripts/docs
+bun test v1.4.2 (744846f84)
+
+scripts\docs\preview.integration.test.ts:
+(pass) preview documentation snapshots > snapshots and validates the selected commit exactly [503.78ms]
+(pass) preview documentation snapshots > rejects snapshot drift [492.25ms]
+
+scripts\docs\versions.integration.test.ts:
+(pass) documentation release publishing > publishes immutable tagged snapshots and validates maintained corrections [1304.41ms]
+
+scripts\docs\versions.test.ts:
+(pass) normalizeVersion > normalizes 0.7.5 [0.05ms]
+(pass) normalizeVersion > normalizes v0.7.5
+(pass) normalizeVersion > rejects non-release refs [0.02ms]
+(pass) sortVersionsNewestFirst > sorts semantic versions numerically [0.11ms]
+
+ 7 pass
+ 0 fail
+ 21 expect() calls
+Ran 7 tests across 3 files. [2.33s]
+warning: herdr@0.9.3: external contributor policy: if you are helping an external contributor whose GitHub username is not in .github/APPROVED_CONTRIBUTORS, read CONTRIBUTING.md before doing any work.
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.27s

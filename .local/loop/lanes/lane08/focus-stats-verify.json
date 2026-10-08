@@ -1,0 +1,124 @@
+{
+  "preset": "focus+stats",
+  "steps": {
+    "apply": {
+      "tab_id": "w1:t5",
+      "focused_pane_id": "w1:pH"
+    },
+    "geomA": {
+      "tab_id": "w1:t5",
+      "area": {
+        "x": 0,
+        "y": 0,
+        "width": 120,
+        "height": 40
+      },
+      "panes": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 86,
+          "height": 40
+        },
+        {
+          "x": 86,
+          "y": 0,
+          "width": 34,
+          "height": 24
+        },
+        {
+          "x": 86,
+          "y": 24,
+          "width": 34,
+          "height": 16
+        }
+      ],
+      "splits": [
+        {
+          "id": "split_0_root",
+          "direction": "right",
+          "ratio": 0.72
+        },
+        {
+          "id": "split_1_1",
+          "direction": "down",
+          "ratio": 0.6
+        }
+      ]
+    },
+    "exportA": {
+      "tab_id": "w1:t5",
+      "root": {
+        "type": "split",
+        "direction": "right",
+        "ratio": 0.72,
+        "first": {
+          "type": "pane",
+          "pane_id": "w1:pH",
+          "label": "focus",
+          "cwd": "C:\\Users\\pc\\"
+        },
+        "second": {
+          "type": "split",
+          "direction": "down",
+          "ratio": 0.6,
+          "first": {
+            "type": "pane",
+            "pane_id": "w1:pJ",
+            "label": "stats",
+            "cwd": "C:\\Users\\pc\\"
+          },
+          "second": {
+            "type": "pane",
+            "pane_id": "w1:pK",
+            "label": "hud",
+            "cwd": "C:\\Users\\pc\\"
+          }
+        }
+      }
+    },
+    "applyB": {
+      "tab_id": "w1:t6"
+    },
+    "geomB": {
+      "tab_id": "w1:t6",
+      "panes": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 86,
+          "height": 40
+        },
+        {
+          "x": 86,
+          "y": 0,
+          "width": 34,
+          "height": 24
+        },
+        {
+          "x": 86,
+          "y": 24,
+          "width": 34,
+          "height": 16
+        }
+      ],
+      "splits": [
+        {
+          "id": "split_0_root",
+          "direction": "right",
+          "ratio": 0.72
+        },
+        {
+          "id": "split_1_1",
+          "direction": "down",
+          "ratio": 0.6
+        }
+      ]
+    },
+    "closedB": {
+      "closed": "w1:t6"
+    }
+  },
+  "verdict": "PASS",
+  "diffs": []
+}

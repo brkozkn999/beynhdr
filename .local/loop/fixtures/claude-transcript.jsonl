@@ -1,0 +1,5 @@
+{"type":"user","message":{"role":"user","content":"hello"},"costUSD":0.12}
+{"type":"assistant","message":{"role":"assistant","usage":{"input_tokens":12,"cache_creation_input_tokens":1800,"cache_read_input_tokens":73200,"output_tokens":2500}}}
+{"type":"user","message":{"role":"user","content":"again"},"costUSD":0.30}
+{"type":"assistant","message":{"role":"assistant","usage":{"input_tokens":5,"cache_creation_input_tokens":0,"cache_read_input_tokens":81000,"output_tokens":900}}}
+{"type":"summary","summary":"done"}

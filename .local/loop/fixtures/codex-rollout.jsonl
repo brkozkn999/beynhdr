@@ -1,0 +1,4 @@
+{"type":"session_meta","payload":{"id":"abc","cwd":"C:\\repo"}}
+{"type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"total_tokens":120000}},"rate_limits":{"primary":{"used_percent":4.1,"window_minutes":300},"credits":{"balance":"2100.2"}}}}
+{"type":"response_item","payload":{"type":"message"}}
+{"type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"total_tokens":3642134}},"rate_limits":{"primary":{"used_percent":16.4,"window_minutes":10080},"credits":{"balance":"2063.5"}}}}
