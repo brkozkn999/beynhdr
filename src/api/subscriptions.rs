@@ -160,6 +160,8 @@ impl ActiveSubscription {
             }
             Subscription::LayoutUpdated {} => Ok(event_subscription(EventKind::LayoutUpdated)),
             Subscription::BusMessage {} => Ok(event_subscription(EventKind::BusMessage)),
+            Subscription::LaneCreated {} => Ok(event_subscription(EventKind::LaneCreated)),
+            Subscription::LaneDestroyed {} => Ok(event_subscription(EventKind::LaneDestroyed)),
             Subscription::PaneOutputMatched {
                 pane_id,
                 source,

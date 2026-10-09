@@ -30,8 +30,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use bytes::Bytes;
 
 use crate::api::schema::{
-    AgentStartParams, LaneCreateParams, LaneDestroyParams, LaneInfo, LaneStatus, Method, Request,
-    ResponseResult, WorktreeInfo, WorktreeRemoveParams,
+    AgentStartParams, EventData, EventEnvelope, EventKind, LaneCreateParams, LaneDestroyParams,
+    LaneInfo, LaneStatus, Method, Request, ResponseResult, WorktreeInfo, WorktreeRemoveParams,
 };
 use crate::app::App;
 use crate::events::{AppEvent, LaneCleanupResult, LaneCreateRollbackResult};
@@ -55,7 +55,8 @@ const STEP_PANE_RUN: &str = "pane_run";
 const STEP_AGENT_START: &str = "agent_start";
 
 /// A lane that finished `lane.create` and has not been destroyed. The registry
-/// is runtime state — like metadata tokens it does not persist across restarts.
+/// persists inside the session snapshot; on restore a record whose workspace
+/// did not come back simply lists as `orphaned` (see `lane_status_for_record`).
 #[derive(Debug, Clone)]
 pub(crate) struct LaneRecord {
     pub lane_id: String,
@@ -71,6 +72,48 @@ pub(crate) struct LaneRecord {
     pub workspace_internal_id: Option<String>,
     pub trust_repository: bool,
     pub created_unix_ms: u64,
+}
+
+impl LaneRecord {
+    pub(crate) fn to_snapshot(&self) -> crate::persist::LaneSnapshot {
+        crate::persist::LaneSnapshot {
+            lane_id: self.lane_id.clone(),
+            name: self.name.clone(),
+            branch: self.branch.clone(),
+            branch_created: self.branch_created,
+            checkout_path: self.checkout_path.clone(),
+            repo_root: self.repo_root.clone(),
+            repo_name: self.repo_name.clone(),
+            workspace_internal_id: self.workspace_internal_id.clone(),
+            trust_repository: self.trust_repository,
+            created_unix_ms: self.created_unix_ms,
+        }
+    }
+
+    pub(crate) fn from_snapshot(snapshot: &crate::persist::LaneSnapshot) -> Self {
+        Self {
+            lane_id: snapshot.lane_id.clone(),
+            name: snapshot.name.clone(),
+            branch: snapshot.branch.clone(),
+            branch_created: snapshot.branch_created,
+            checkout_path: snapshot.checkout_path.clone(),
+            repo_root: snapshot.repo_root.clone(),
+            repo_name: snapshot.repo_name.clone(),
+            workspace_internal_id: snapshot.workspace_internal_id.clone(),
+            trust_repository: snapshot.trust_repository,
+            created_unix_ms: snapshot.created_unix_ms,
+        }
+    }
+
+    /// Recompute the `lane-N` allocator after restoring persisted records so
+    /// new lanes never collide with restored ids.
+    pub(crate) fn next_id_after_restore(lanes: &HashMap<String, LaneRecord>) -> u64 {
+        lanes
+            .keys()
+            .filter_map(|id| id.strip_prefix("lane-")?.parse::<u64>().ok())
+            .max()
+            .map_or(1, |max| max.saturating_add(1))
+    }
 }
 
 /// In-flight `lane.create` state, keyed by worktree operation id.
@@ -606,6 +649,13 @@ impl App {
         };
         let lane = self.lane_info(&record, Some(ws_idx), agent_info);
         self.lanes.insert(record.lane_id.clone(), record);
+        self.state.mark_session_dirty();
+        self.emit_event(EventEnvelope {
+            event: EventKind::LaneCreated,
+            data: EventData::LaneCreated {
+                lane: Box::new(lane.clone()),
+            },
+        });
         let response = encode_success(
             pending.api.id,
             ResponseResult::LaneCreated {
@@ -1100,7 +1150,18 @@ impl App {
             }
             Ok(()) => {
                 self.lanes.remove(&pending.lane_id);
+                self.state.mark_session_dirty();
                 let branch_deleted = matches!(result.branch_delete, Some(Ok(())));
+                self.emit_event(EventEnvelope {
+                    event: EventKind::LaneDestroyed,
+                    data: EventData::LaneDestroyed {
+                        lane_id: pending.lane_id.clone(),
+                        workspace_id: pending.workspace_id.clone(),
+                        path: pending.path.display().to_string(),
+                        branch: pending.branch.clone(),
+                        branch_deleted,
+                    },
+                });
                 Self::send_api_response(
                     pending.respond_to,
                     encode_success(
@@ -1735,5 +1796,133 @@ mod tests {
         );
         assert!(managed_remove_outcome(Some("not json".into())).is_err());
         assert!(managed_remove_outcome(None).is_err());
+    }
+
+    #[test]
+    fn lane_record_snapshot_round_trip() {
+        let record = LaneRecord {
+            lane_id: "lane-3".into(),
+            name: "feat".into(),
+            branch: "lane/feat".into(),
+            branch_created: true,
+            checkout_path: PathBuf::from("checkout"),
+            repo_root: PathBuf::from("repo"),
+            repo_name: "repo".into(),
+            workspace_internal_id: Some("w9".into()),
+            trust_repository: true,
+            created_unix_ms: 1_234,
+        };
+        let json = serde_json::to_string(&record.to_snapshot()).unwrap();
+        let snapshot: crate::persist::LaneSnapshot = serde_json::from_str(&json).unwrap();
+        let restored = LaneRecord::from_snapshot(&snapshot);
+        assert_eq!(restored.lane_id, record.lane_id);
+        assert_eq!(restored.name, record.name);
+        assert_eq!(restored.branch, record.branch);
+        assert_eq!(restored.branch_created, record.branch_created);
+        assert_eq!(restored.checkout_path, record.checkout_path);
+        assert_eq!(restored.repo_root, record.repo_root);
+        assert_eq!(restored.repo_name, record.repo_name);
+        assert_eq!(restored.workspace_internal_id, record.workspace_internal_id);
+        assert_eq!(restored.trust_repository, record.trust_repository);
+        assert_eq!(restored.created_unix_ms, record.created_unix_ms);
+    }
+
+    #[test]
+    fn next_id_after_restore_skips_past_existing_ids() {
+        let record = |lane_id: &str| LaneRecord {
+            lane_id: lane_id.into(),
+            name: "n".into(),
+            branch: "b".into(),
+            branch_created: false,
+            checkout_path: PathBuf::new(),
+            repo_root: PathBuf::new(),
+            repo_name: "r".into(),
+            workspace_internal_id: None,
+            trust_repository: false,
+            created_unix_ms: 0,
+        };
+        assert_eq!(LaneRecord::next_id_after_restore(&HashMap::new()), 1);
+        let lanes: HashMap<String, LaneRecord> = ["lane-2", "lane-7", "other"]
+            .into_iter()
+            .map(|id| (id.to_string(), record(id)))
+            .collect();
+        assert_eq!(LaneRecord::next_id_after_restore(&lanes), 8);
+    }
+
+    #[tokio::test]
+    async fn lane_create_emits_lane_created_event() {
+        let repo = create_committed_repo("lane-evt-create-repo");
+        let worktree_root = unique_temp_path("lane-evt-create-root");
+        let mut app = app_with_parent(&repo);
+        app.state.worktree_directory = worktree_root.clone();
+
+        let baseline = app.event_hub.current_sequence();
+        let lane = create_lane(&mut app, "lane/evt-create");
+        let checkout = lane_checkout(&lane);
+
+        let events = app.event_hub.events_after(baseline);
+        let created: Vec<_> = events
+            .iter()
+            .filter(|(_, event)| event.event == EventKind::LaneCreated)
+            .collect();
+        assert_eq!(created.len(), 1);
+        let EventData::LaneCreated { lane: emitted } = &created[0].1.data else {
+            panic!("expected lane_created event data");
+        };
+        assert_eq!(emitted.lane_id, lane.lane_id);
+        assert_eq!(emitted.name, lane.name);
+        assert_eq!(emitted.branch, "lane/evt-create");
+        assert_eq!(emitted.status, LaneStatus::Live);
+        assert_eq!(emitted.path, lane.path);
+
+        shutdown_runtimes(&mut app);
+        remove_checkout(&repo, &checkout);
+        let _ = std::fs::remove_dir_all(worktree_root);
+        let _ = std::fs::remove_dir_all(repo);
+    }
+
+    #[tokio::test]
+    async fn lane_destroy_emits_lane_destroyed_event() {
+        let repo = create_committed_repo("lane-evt-destroy-repo");
+        let worktree_root = unique_temp_path("lane-evt-destroy-root");
+        let mut app = app_with_parent(&repo);
+        app.state.worktree_directory = worktree_root.clone();
+
+        let lane = create_lane(&mut app, "lane/evt-destroy");
+        let workspace_id = lane.workspace.as_ref().map(|w| w.workspace_id.clone());
+        let baseline = app.event_hub.current_sequence();
+
+        let response = drive_lane_request(&mut app, lane_destroy_request("destroy", "lane-1"));
+        let success: SuccessResponse = serde_json::from_str(&response)
+            .unwrap_or_else(|err| panic!("lane.destroy did not succeed: {response} ({err})"));
+        let ResponseResult::LaneDestroyed { .. } = success.result else {
+            panic!("expected lane_destroyed response: {response}");
+        };
+
+        let events = app.event_hub.events_after(baseline);
+        let destroyed: Vec<_> = events
+            .iter()
+            .filter(|(_, event)| event.event == EventKind::LaneDestroyed)
+            .collect();
+        assert_eq!(destroyed.len(), 1);
+        let EventData::LaneDestroyed {
+            lane_id,
+            workspace_id: event_workspace_id,
+            path,
+            branch,
+            branch_deleted,
+        } = &destroyed[0].1.data
+        else {
+            panic!("expected lane_destroyed event data");
+        };
+        assert_eq!(lane_id, "lane-1");
+        assert_eq!(event_workspace_id, &workspace_id);
+        assert_eq!(path, &lane.path);
+        assert_eq!(branch, "lane/evt-destroy");
+        assert!(branch_deleted);
+
+        shutdown_runtimes(&mut app);
+        let _ = std::fs::remove_dir_all(worktree_root);
+        let _ = std::fs::remove_dir_all(repo);
     }
 }

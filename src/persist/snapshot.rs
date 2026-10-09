@@ -26,6 +26,27 @@ pub struct SessionSnapshot {
     pub sidebar_section_split: Option<f32>,
     #[serde(default)]
     pub collapsed_space_keys: std::collections::HashSet<String>,
+    /// Lane registry entries (`lane.create` results), persisted so `lane.list`
+    /// and `lane.destroy` keep working across restarts.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub lanes: Vec<LaneSnapshot>,
+}
+
+/// Serializable lane registry record. Mirrors `app::api::lanes::LaneRecord`;
+/// conversion lives next to the record.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LaneSnapshot {
+    pub lane_id: String,
+    pub name: String,
+    pub branch: String,
+    pub branch_created: bool,
+    pub checkout_path: PathBuf,
+    pub repo_root: PathBuf,
+    pub repo_name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub workspace_internal_id: Option<String>,
+    pub trust_repository: bool,
+    pub created_unix_ms: u64,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -205,6 +226,8 @@ struct RawSessionSnapshot {
     sidebar_section_split: Option<f32>,
     #[serde(default)]
     collapsed_space_keys: std::collections::HashSet<String>,
+    #[serde(default)]
+    lanes: Vec<LaneSnapshot>,
 }
 
 fn migrate_snapshot(raw: RawSessionSnapshot) -> Result<SessionSnapshot, String> {
@@ -220,6 +243,7 @@ fn migrate_snapshot(raw: RawSessionSnapshot) -> Result<SessionSnapshot, String> 
         sidebar_width: raw.sidebar_width,
         sidebar_section_split: raw.sidebar_section_split,
         collapsed_space_keys: raw.collapsed_space_keys,
+        lanes: raw.lanes,
     })
 }
 
@@ -291,6 +315,7 @@ pub fn capture(
         sidebar_width: None,
         sidebar_section_split: None,
         collapsed_space_keys: std::collections::HashSet::new(),
+        lanes: Vec::new(),
     }
 }
 
@@ -710,6 +735,7 @@ mod tests {
             sidebar_width: Some(26),
             sidebar_section_split: Some(0.5),
             collapsed_space_keys: std::collections::HashSet::new(),
+            lanes: Vec::new(),
         };
         let json = serde_json::to_string(&snap).unwrap();
         let restored = parse_snapshot(&json).unwrap();
@@ -801,6 +827,7 @@ mod tests {
             sidebar_width: Some(26),
             sidebar_section_split: Some(0.5),
             collapsed_space_keys: std::collections::HashSet::new(),
+            lanes: Vec::new(),
             version: SNAPSHOT_VERSION,
         };
 
@@ -1435,6 +1462,47 @@ mod tests {
     }
 
     #[test]
+    fn snapshot_without_lanes_restores_empty_registry() {
+        let json = r#"{"workspaces":[],"active":null,"selected":0}"#;
+        let snap = parse_snapshot(json).unwrap();
+        assert!(snap.lanes.is_empty());
+    }
+
+    #[test]
+    fn snapshot_parses_lane_records() {
+        let json = r#"{
+            "workspaces": [],
+            "active": null,
+            "selected": 0,
+            "lanes": [{
+                "lane_id": "lane-7",
+                "name": "feat",
+                "branch": "lane/feat",
+                "branch_created": true,
+                "checkout_path": "/tmp/co",
+                "repo_root": "/tmp/repo",
+                "repo_name": "repo",
+                "workspace_internal_id": "w9",
+                "trust_repository": false,
+                "created_unix_ms": 1234
+            }]
+        }"#;
+        let snap = parse_snapshot(json).unwrap();
+        assert_eq!(snap.lanes.len(), 1);
+        let lane = &snap.lanes[0];
+        assert_eq!(lane.lane_id, "lane-7");
+        assert_eq!(lane.name, "feat");
+        assert_eq!(lane.branch, "lane/feat");
+        assert!(lane.branch_created);
+        assert_eq!(lane.checkout_path, PathBuf::from("/tmp/co"));
+        assert_eq!(lane.repo_root, PathBuf::from("/tmp/repo"));
+        assert_eq!(lane.repo_name, "repo");
+        assert_eq!(lane.workspace_internal_id.as_deref(), Some("w9"));
+        assert!(!lane.trust_repository);
+        assert_eq!(lane.created_unix_ms, 1234);
+    }
+
+    #[test]
     fn active_tab_default_is_zero() {
         let json = r#"{"custom_name":"test","identity_cwd":"/tmp","tabs":[]}"#;
         let ws: WorkspaceSnapshot = serde_json::from_str(json).unwrap();
@@ -1504,6 +1572,7 @@ mod tests {
             sidebar_width: Some(26),
             sidebar_section_split: Some(0.5),
             collapsed_space_keys: std::collections::HashSet::new(),
+            lanes: Vec::new(),
         };
 
         let json = serde_json::to_string(&snap).unwrap();
