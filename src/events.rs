@@ -73,6 +73,46 @@ pub(crate) struct WorktreeReadData {
     pub entries: Vec<crate::worktree::ExistingWorktree>,
 }
 
+/// Result of a lane `git worktree add` run by the lane create worker thread.
+#[derive(Debug)]
+pub struct LaneAddResult {
+    pub operation_id: u64,
+    /// Resolved checkout directory the add targeted.
+    pub path: std::path::PathBuf,
+    /// Whether the lane branch already existed locally when the add started
+    /// (`true` = attached to an existing branch, `false` = the add may have
+    /// created it, so rollback should attempt branch deletion).
+    pub branch_existed: bool,
+    pub result: Result<(), String>,
+}
+
+/// Outcome of a lane cleanup sequence (create rollback or `lane.destroy`).
+///
+/// `worktree_remove` and `branch_delete` carry per-step results so the
+/// response can report exactly what cleanup succeeded, failed, or was skipped.
+#[derive(Debug)]
+pub struct LaneCleanupResult {
+    pub operation_id: u64,
+    /// The worktree remove ran through the managed API flow; on success its
+    /// handler already closed the lane workspace and emitted those events.
+    pub via_managed_remove: bool,
+    /// Whether the worktree removal step removed the checkout.
+    pub worktree_remove: Result<(), String>,
+    /// `Some` when a lane-created branch deletion was attempted.
+    pub branch_delete: Option<Result<(), String>>,
+}
+
+/// Rollback outcome for a failed `lane.create` step.
+#[derive(Debug)]
+pub struct LaneCreateRollbackResult {
+    pub operation_id: u64,
+    /// Creation step that failed (e.g. `"workspace_create"`, `"agent_start"`).
+    pub failed_step: &'static str,
+    /// The original failure message from that step.
+    pub error: String,
+    pub cleanup: LaneCleanupResult,
+}
+
 /// An event from a background task to the main loop.
 #[derive(Debug)]
 pub enum AppEvent {
@@ -217,4 +257,10 @@ pub enum AppEvent {
     WorktreeRemoveFinished(Box<WorktreeRemoveResult>),
     /// Background worktree discovery completed for an API list/open request.
     WorktreeReadFinished(Box<WorktreeReadResult>),
+    /// Background `git worktree add` for `lane.create` completed.
+    LaneWorktreeAddFinished(Box<LaneAddResult>),
+    /// Rollback cleanup for a failed `lane.create` step completed.
+    LaneCreateRollbackFinished(Box<LaneCreateRollbackResult>),
+    /// Cleanup for a `lane.destroy` request completed.
+    LaneDestroyFinished(Box<LaneCleanupResult>),
 }

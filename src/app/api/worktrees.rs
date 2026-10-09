@@ -11,13 +11,13 @@ use super::responses::{encode_error, encode_success};
 mod deferred;
 mod reads;
 
-struct ApiFailure {
-    code: &'static str,
-    message: String,
+pub(super) struct ApiFailure {
+    pub(super) code: &'static str,
+    pub(super) message: String,
 }
 
 impl ApiFailure {
-    fn new(code: &'static str, message: impl Into<String>) -> Self {
+    pub(super) fn new(code: &'static str, message: impl Into<String>) -> Self {
         Self {
             code,
             message: message.into(),
@@ -25,7 +25,7 @@ impl ApiFailure {
     }
 }
 
-fn absolute_user_path(path: &str) -> Result<PathBuf, ApiFailure> {
+pub(super) fn absolute_user_path(path: &str) -> Result<PathBuf, ApiFailure> {
     let path = crate::worktree::expand_tilde_path(path);
     if path.is_absolute() {
         Ok(path)
@@ -37,12 +37,12 @@ fn absolute_user_path(path: &str) -> Result<PathBuf, ApiFailure> {
     }
 }
 
-struct WorktreeSource {
-    workspace_idx: Option<usize>,
-    source_checkout_path: PathBuf,
-    source_repo_root: PathBuf,
-    repo_key: String,
-    repo_name: String,
+pub(super) struct WorktreeSource {
+    pub(super) workspace_idx: Option<usize>,
+    pub(super) source_checkout_path: PathBuf,
+    pub(super) source_repo_root: PathBuf,
+    pub(super) repo_key: String,
+    pub(super) repo_name: String,
 }
 
 impl App {
@@ -164,7 +164,7 @@ impl App {
         )
     }
 
-    fn resolve_worktree_source(
+    pub(super) fn resolve_worktree_source(
         &mut self,
         workspace_id: Option<String>,
         cwd: Option<String>,
@@ -306,7 +306,7 @@ impl App {
         Ok(())
     }
 
-    fn ensure_source_parent_membership(
+    pub(super) fn ensure_source_parent_membership(
         &mut self,
         source: &mut WorktreeSource,
         emit_created_event: bool,
@@ -351,7 +351,7 @@ impl App {
         })
     }
 
-    fn mark_worktree_membership(
+    pub(super) fn mark_worktree_membership(
         &mut self,
         source: &WorktreeSource,
         target_ws_idx: usize,

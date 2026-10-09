@@ -11,6 +11,7 @@ pub(super) fn run_api_command(args: &[String]) -> std::io::Result<i32> {
     match subcommand {
         "schema" => api_schema(&args[1..]),
         "snapshot" => api_snapshot(&args[1..]),
+        "call" => api_call(&args[1..]),
         "help" | "--help" | "-h" => {
             print_api_help();
             Ok(0)
@@ -20,6 +21,42 @@ pub(super) fn run_api_command(args: &[String]) -> std::io::Result<i32> {
             Ok(2)
         }
     }
+}
+
+/// `herdr api call <method> [params-json]` sends one request/response API
+/// call — handy for scripting methods that have no dedicated CLI surface
+/// (e.g. `lane.create`). Streaming methods such as `events.subscribe` or
+/// `agent.wait` are not supported; use a dedicated client for those.
+fn api_call(args: &[String]) -> std::io::Result<i32> {
+    let Some(method) = args.first() else {
+        eprintln!("usage: herdr api call <method> [params-json]");
+        return Ok(2);
+    };
+    if args.len() > 2 {
+        eprintln!("usage: herdr api call <method> [params-json]");
+        return Ok(2);
+    }
+    let params = match args.get(1) {
+        Some(raw) => serde_json::from_str::<serde_json::Value>(raw).map_err(|err| {
+            std::io::Error::new(
+                std::io::ErrorKind::InvalidInput,
+                format!("invalid params JSON: {err}"),
+            )
+        })?,
+        None => serde_json::json!({}),
+    };
+    let request: Request = serde_json::from_value(serde_json::json!({
+        "id": "cli:api:call",
+        "method": method,
+        "params": params,
+    }))
+    .map_err(|err| {
+        std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            format!("unknown method or invalid params for {method}: {err}"),
+        )
+    })?;
+    super::print_response(&super::send_request(&request)?)
 }
 
 fn api_schema(args: &[String]) -> std::io::Result<i32> {
@@ -99,6 +136,7 @@ fn schema_summary_text() -> std::io::Result<String> {
 fn print_api_help() {
     eprintln!("herdr api commands:");
     eprintln!("  herdr api snapshot");
+    eprintln!("  herdr api call <method> [params-json]");
     eprintln!("  herdr api schema [--json | --output PATH]");
 }
 

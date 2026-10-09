@@ -133,6 +133,18 @@ pub struct App {
     pub(crate) pending_worktree_remove_runtime_exits: HashMap<crate::layout::PaneId, usize>,
     pub(crate) pending_worktree_remove_runtime_restores: HashMap<crate::layout::PaneId, u64>,
     pub(crate) next_api_worktree_operation_id: u64,
+    /// Lanes that finished `lane.create` and have not been destroyed, keyed by
+    /// lane id (`lane-N`). Runtime state — like metadata tokens it does not
+    /// persist across restarts.
+    pub(crate) lanes: HashMap<String, crate::app::api::lanes::LaneRecord>,
+    /// Allocates `lane-N` identities.
+    pub(crate) next_lane_id: u64,
+    /// In-flight `lane.create` operations, keyed by worktree operation id.
+    /// Entries stay in place while create rollback runs so the rollback
+    /// completion can answer the original request.
+    pub(crate) pending_lane_creates: HashMap<u64, crate::app::api::lanes::PendingLaneCreate>,
+    /// In-flight `lane.destroy` operations, keyed by worktree operation id.
+    pub(crate) pending_lane_destroys: HashMap<u64, crate::app::api::lanes::PendingLaneDestroy>,
     pub(crate) next_auto_update_check: Option<Instant>,
     pub(crate) next_agent_manifest_update_check: Option<Instant>,
     pub(crate) update_version_check_enabled: bool,
@@ -642,6 +654,10 @@ impl App {
             pending_worktree_remove_runtime_exits: HashMap::new(),
             pending_worktree_remove_runtime_restores: HashMap::new(),
             next_api_worktree_operation_id: 1,
+            lanes: HashMap::new(),
+            next_lane_id: 1,
+            pending_lane_creates: HashMap::new(),
+            pending_lane_destroys: HashMap::new(),
             next_auto_update_check: version_check_enabled
                 .then_some(Instant::now() + AUTO_UPDATE_CHECK_INTERVAL),
             next_agent_manifest_update_check: manifest_check_enabled

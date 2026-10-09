@@ -5,6 +5,7 @@ pub mod commands;
 pub mod common;
 pub mod events;
 pub mod integrations;
+pub mod lanes;
 pub mod panes;
 pub mod plugins;
 pub mod response;
@@ -19,6 +20,7 @@ pub use commands::*;
 pub use common::*;
 pub use events::*;
 pub use integrations::*;
+pub use lanes::*;
 pub use panes::*;
 pub use plugins::*;
 pub use response::*;
@@ -101,6 +103,12 @@ pub enum Method {
     WorktreeOpen(WorktreeOpenParams),
     #[serde(rename = "worktree.remove")]
     WorktreeRemove(WorktreeRemoveParams),
+    #[serde(rename = "lane.create")]
+    LaneCreate(LaneCreateParams),
+    #[serde(rename = "lane.list")]
+    LaneList(EmptyParams),
+    #[serde(rename = "lane.destroy")]
+    LaneDestroy(LaneDestroyParams),
     #[serde(rename = "tab.create")]
     TabCreate(TabCreateParams),
     #[serde(rename = "tab.list")]

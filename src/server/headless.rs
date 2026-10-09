@@ -3019,6 +3019,15 @@ impl HeadlessServer {
             );
             return changed | (deferred_changed && !read_only);
         }
+        if matches!(
+            &msg.request.method,
+            api::schema::Method::LaneCreate(_) | api::schema::Method::LaneDestroy(_)
+        ) {
+            let deferred_changed = self
+                .app
+                .handle_deferred_lane_api_request(msg.request, msg.respond_to);
+            return changed | deferred_changed;
+        }
         if self.foreground_client_id.is_some_and(|client_id| {
             self.clients
                 .get(&client_id)

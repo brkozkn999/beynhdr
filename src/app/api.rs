@@ -4,6 +4,7 @@ mod agent_view;
 mod agents;
 mod env;
 mod integrations;
+pub(crate) mod lanes;
 mod layouts;
 mod panes;
 pub(crate) mod plugins;
@@ -204,6 +205,21 @@ impl App {
 
         if let AppEvent::WorktreeRemoveFinished(result) = ev {
             return self.handle_api_worktree_remove_finished(*result);
+        }
+
+        if let AppEvent::LaneWorktreeAddFinished(result) = ev {
+            self.handle_api_lane_worktree_add_finished(*result);
+            return Vec::new();
+        }
+
+        if let AppEvent::LaneCreateRollbackFinished(result) = ev {
+            self.handle_api_lane_rollback_finished(*result);
+            return Vec::new();
+        }
+
+        if let AppEvent::LaneDestroyFinished(result) = ev {
+            self.handle_api_lane_destroy_finished(*result);
+            return Vec::new();
         }
 
         let mut worktree_restore_updates = Vec::new();
@@ -1105,6 +1121,23 @@ impl App {
                     "worktree.remove is handled asynchronously by the app runtime",
                 );
             }
+            Method::LaneCreate(params) => {
+                let _ = params;
+                return responses::encode_error(
+                    request.id,
+                    "invalid_request",
+                    "lane.create is handled asynchronously by the app runtime",
+                );
+            }
+            Method::LaneDestroy(params) => {
+                let _ = params;
+                return responses::encode_error(
+                    request.id,
+                    "invalid_request",
+                    "lane.destroy is handled asynchronously by the app runtime",
+                );
+            }
+            Method::LaneList(_) => return self.handle_lane_list(request.id),
             Method::TabList(params) => return self.handle_tab_list(request.id, params),
             Method::TabGet(target) => return self.handle_tab_get(request.id, target),
             Method::TabCreate(params) => return self.handle_tab_create(request.id, params),

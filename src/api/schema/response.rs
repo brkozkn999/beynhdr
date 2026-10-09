@@ -6,6 +6,7 @@ use super::events::EventEnvelope;
 use super::integrations::{
     IntegrationInstallResult, IntegrationTarget, IntegrationUninstallResult,
 };
+use super::lanes::LaneInfo;
 use super::panes::{
     LayoutDescription, PaneEdgesResult, PaneFocusDirectionResult, PaneInfo, PaneLayoutSnapshot,
     PaneMoveResult, PaneNeighborResult, PaneProcessInfo, PaneReadResult, PaneResizeResult,
@@ -83,6 +84,22 @@ pub enum ResponseResult {
         workspace_id: String,
         path: String,
         forced: bool,
+    },
+    LaneCreated {
+        lane: Box<LaneInfo>,
+    },
+    LaneList {
+        lanes: Vec<LaneInfo>,
+    },
+    LaneDestroyed {
+        lane_id: String,
+        /// Workspace that was closed, if the lane workspace was still open.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        workspace_id: Option<String>,
+        path: String,
+        branch: String,
+        /// True when the lane's own branch was deleted.
+        branch_deleted: bool,
     },
     TabInfo {
         tab: TabInfo,

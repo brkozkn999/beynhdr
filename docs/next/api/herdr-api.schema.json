@@ -2195,6 +2195,98 @@
           ],
           "type": "object"
         },
+        "LaneCreateParams": {
+          "description": "Parameters for `lane.create`.\n\nOne atomic call that materializes a worktree, opens a dedicated workspace,\nstamps `core.lane` identity tokens, and optionally submits a run command\nand/or starts an agent on the lane's root pane. If any step fails, every\nresource created earlier in the chain is rolled back.",
+          "properties": {
+            "agent": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "agent_args": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "agent_name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "base": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "branch": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "cwd": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "focus": {
+              "default": false,
+              "type": "boolean"
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "path": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "run": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "trust_repository": {
+              "type": "boolean"
+            },
+            "workspace_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "type": "object"
+        },
+        "LaneDestroyParams": {
+          "description": "Parameters for `lane.destroy`: removes the lane's worktree (and workspace\nwhen still open) and deletes the lane branch when `lane.create` created it.",
+          "properties": {
+            "force": {
+              "default": false,
+              "type": "boolean"
+            },
+            "lane": {
+              "type": "string"
+            },
+            "trust_repository": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "lane"
+          ],
+          "type": "object"
+        },
         "LayoutApplyParams": {
           "properties": {
             "focus": {
@@ -5132,6 +5224,54 @@
         {
           "properties": {
             "method": {
+              "const": "lane.create",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/schemas/request/$defs/LaneCreateParams"
+            }
+          },
+          "required": [
+            "method",
+            "params"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "method": {
+              "const": "lane.list",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/schemas/request/$defs/EmptyParams"
+            }
+          },
+          "required": [
+            "method",
+            "params"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "method": {
+              "const": "lane.destroy",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/schemas/request/$defs/LaneDestroyParams"
+            }
+          },
+          "required": [
+            "method",
+            "params"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "method": {
               "const": "tab.create",
               "type": "string"
             },
@@ -7669,6 +7809,112 @@
           ],
           "type": "object"
         },
+        "LaneInfo": {
+          "description": "One lane entry as reported by `lane.create` and `lane.list`.",
+          "properties": {
+            "agent": {
+              "anyOf": [
+                {
+                  "$ref": "#/schemas/success_response/$defs/AgentInfo"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Agent started on the root pane, when requested and successful."
+            },
+            "branch": {
+              "description": "Branch checked out by the lane worktree.",
+              "type": "string"
+            },
+            "branch_created": {
+              "description": "True when `lane.create` created the branch (it did not exist locally\nbeforehand). Only such branches are deleted by rollback/`lane.destroy`.",
+              "type": "boolean"
+            },
+            "created_unix_ms": {
+              "description": "Unix milliseconds when the lane was created.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "lane_id": {
+              "description": "Stable lane identity, e.g. `\"lane-1\"`. Also stamped as the `lane_id`\ntoken (source `core.lane`) on the lane workspace and its root pane.",
+              "type": "string"
+            },
+            "name": {
+              "description": "Human label (`name` param or derived from the repo/branch).",
+              "type": "string"
+            },
+            "path": {
+              "description": "Worktree checkout directory.",
+              "type": "string"
+            },
+            "repo_root": {
+              "description": "Canonical path of the repository the worktree belongs to.",
+              "type": "string"
+            },
+            "root_pane": {
+              "anyOf": [
+                {
+                  "$ref": "#/schemas/success_response/$defs/PaneInfo"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Root pane of the lane workspace (where `run`/`agent` were applied)."
+            },
+            "status": {
+              "$ref": "#/schemas/success_response/$defs/LaneStatus"
+            },
+            "workspace": {
+              "anyOf": [
+                {
+                  "$ref": "#/schemas/success_response/$defs/WorkspaceInfo"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "worktree": {
+              "anyOf": [
+                {
+                  "$ref": "#/schemas/success_response/$defs/WorktreeInfo"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "lane_id",
+            "name",
+            "status",
+            "branch",
+            "branch_created",
+            "path",
+            "repo_root",
+            "created_unix_ms"
+          ],
+          "type": "object"
+        },
+        "LaneStatus": {
+          "description": "Lifecycle state of a lane as reported by `lane.list` and `lane.create`.",
+          "oneOf": [
+            {
+              "const": "live",
+              "description": "Workspace open — fully usable lane.",
+              "type": "string"
+            },
+            {
+              "const": "orphaned",
+              "description": "Workspace closed (by the user or a failed restore); the worktree\ncheckout and branch still exist on disk.",
+              "type": "string"
+            }
+          ]
+        },
         "LayoutDescription": {
           "properties": {
             "focused_pane_id": {
@@ -9379,6 +9625,77 @@
                 "workspace_id",
                 "path",
                 "forced"
+              ],
+              "type": "object"
+            },
+            {
+              "properties": {
+                "lane": {
+                  "$ref": "#/schemas/success_response/$defs/LaneInfo"
+                },
+                "type": {
+                  "const": "lane_created",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "lane"
+              ],
+              "type": "object"
+            },
+            {
+              "properties": {
+                "lanes": {
+                  "items": {
+                    "$ref": "#/schemas/success_response/$defs/LaneInfo"
+                  },
+                  "type": "array"
+                },
+                "type": {
+                  "const": "lane_list",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "lanes"
+              ],
+              "type": "object"
+            },
+            {
+              "properties": {
+                "branch": {
+                  "type": "string"
+                },
+                "branch_deleted": {
+                  "description": "True when the lane's own branch was deleted.",
+                  "type": "boolean"
+                },
+                "lane_id": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "type": {
+                  "const": "lane_destroyed",
+                  "type": "string"
+                },
+                "workspace_id": {
+                  "description": "Workspace that was closed, if the lane workspace was still open.",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "lane_id",
+                "path",
+                "branch",
+                "branch_deleted"
               ],
               "type": "object"
             },

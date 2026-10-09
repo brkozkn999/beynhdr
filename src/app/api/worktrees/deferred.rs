@@ -36,17 +36,20 @@ impl App {
         }
     }
 
-    fn send_api_response(respond_to: std::sync::mpsc::Sender<String>, response: String) {
+    pub(crate) fn send_api_response(respond_to: std::sync::mpsc::Sender<String>, response: String) {
         let _ = respond_to.send(response);
     }
 
-    fn next_api_worktree_operation_id(&mut self) -> u64 {
+    pub(crate) fn next_api_worktree_operation_id(&mut self) -> u64 {
         let id = self.next_api_worktree_operation_id;
         self.next_api_worktree_operation_id = self.next_api_worktree_operation_id.saturating_add(1);
         id
     }
 
-    fn api_create_source_workspace_idx(&self, api: &ApiWorktreeAddRequest) -> Option<usize> {
+    pub(crate) fn api_create_source_workspace_idx(
+        &self,
+        api: &ApiWorktreeAddRequest,
+    ) -> Option<usize> {
         let Some(source_workspace_id) = api.source_workspace_id.as_ref() else {
             return self.find_parent_workspace_by_key(&api.repo_key);
         };
@@ -226,7 +229,7 @@ impl App {
 
     /// Reports a worker that never started through the normal completion path,
     /// so pending-operation and runtime cleanup stay in one place.
-    fn queue_worktree_spawn_failure(&self, finished: AppEvent) {
+    pub(crate) fn queue_worktree_spawn_failure(&self, finished: AppEvent) {
         tracing::warn!("failed to spawn worktree operation thread");
         match self.event_tx.try_send(finished) {
             Ok(()) => {}
@@ -242,7 +245,7 @@ impl App {
         }
     }
 
-    fn start_api_worktree_remove(
+    pub(crate) fn start_api_worktree_remove(
         &mut self,
         id: String,
         params: WorktreeRemoveParams,

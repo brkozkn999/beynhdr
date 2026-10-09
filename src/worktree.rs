@@ -321,6 +321,42 @@ pub(crate) fn run_worktree_add_command(
     run_worktree_command(&command)
 }
 
+/// Builds the lane `git worktree add` command and reports whether the branch
+/// already existed (`true` = attach, `false` = the add may create it). The
+/// flag drives lane rollback/`lane.destroy`: only a lane-created branch is
+/// deleted during cleanup.
+pub(crate) fn lane_worktree_add_command(
+    repo_root: &Path,
+    path: &Path,
+    branch: &str,
+    base: &str,
+    trust_repository: bool,
+) -> Result<(WorktreeCommand, bool), String> {
+    let branch_existed = local_branch_exists(repo_root, branch, trust_repository)?;
+    let command = if branch_existed {
+        build_worktree_add_existing_branch_command(repo_root, path, branch, trust_repository)
+    } else {
+        build_worktree_add_new_branch_command(repo_root, path, branch, base, trust_repository)
+    };
+    Ok((command, branch_existed))
+}
+
+/// Force-deletes a local branch. Lane rollback and `lane.destroy` call this
+/// after the lane worktree was removed (git refuses to delete a branch that
+/// is still checked out in a worktree).
+pub(crate) fn run_branch_delete_command(
+    repo_root: &Path,
+    branch: &str,
+    trust_repository: bool,
+) -> Result<(), String> {
+    let mut args = repository_git_args(repo_root, trust_repository);
+    args.extend(["branch".to_string(), "-D".to_string(), branch.to_string()]);
+    run_worktree_command(&WorktreeCommand {
+        program: "git".to_string(),
+        args,
+    })
+}
+
 pub(crate) fn run_worktree_command(command: &WorktreeCommand) -> Result<(), String> {
     let output = crate::noninteractive_process::command(&command.program)
         // Removal errors are classified by Git's English diagnostics.
