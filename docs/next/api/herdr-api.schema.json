@@ -6921,43 +6921,11 @@
         {
           "properties": {
             "method": {
-              "const": "preview.open",
-              "type": "string"
-            },
-            "params": {
-              "$ref": "#/schemas/request/$defs/PreviewOpenParams"
-            }
-          },
-          "required": [
-            "method",
-            "params"
-          ],
-          "type": "object"
-        },
-        {
-          "properties": {
-            "method": {
               "const": "bus.list",
               "type": "string"
             },
             "params": {
               "$ref": "#/schemas/request/$defs/BusListParams"
-            }
-          },
-          "required": [
-            "method",
-            "params"
-          ],
-          "type": "object"
-        },
-        {
-          "properties": {
-            "method": {
-              "const": "preview.set",
-              "type": "string"
-            },
-            "params": {
-              "$ref": "#/schemas/request/$defs/PreviewSetParams"
             }
           },
           "required": [
@@ -6990,6 +6958,38 @@
             },
             "params": {
               "$ref": "#/schemas/request/$defs/BusAckParams"
+            }
+          },
+          "required": [
+            "method",
+            "params"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "method": {
+              "const": "preview.open",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/schemas/request/$defs/PreviewOpenParams"
+            }
+          },
+          "required": [
+            "method",
+            "params"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "method": {
+              "const": "preview.set",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/schemas/request/$defs/PreviewSetParams"
             }
           },
           "required": [
