@@ -46,7 +46,8 @@ pub(super) fn command() -> Command {
         .subcommand(terminal_command())
         .subcommand(session_command())
         .subcommand(integration_command())
-        .subcommand(plugin_command());
+        .subcommand(plugin_command())
+        .subcommand(preview_command());
     configure_help(command, 0)
 }
 
@@ -907,6 +908,49 @@ fn plugin_command() -> Command {
                         .about("Close a plugin pane")
                         .arg(required("pane_id", "PANE_ID")),
                 ),
+        )
+}
+
+fn preview_command() -> Command {
+    Command::new("preview")
+        .about("Open read-only text and markdown preview panes")
+        .subcommand(
+            Command::new("open")
+                .about("Open a preview pane")
+                .arg(option("title", "TITLE").required(true))
+                .arg(option("content", "TEXT"))
+                .arg(path_option("file", "PATH"))
+                .arg(
+                    option("type", "TYPE")
+                        .value_parser(["text", "markdown"])
+                        .help("Content type (default: text)"),
+                )
+                .arg(
+                    option("placement", "PLACEMENT")
+                        .value_parser(["overlay", "split", "tab"])
+                        .help("Layout placement (default: overlay)"),
+                )
+                .arg(option("pane", "PANE_ID").help("Split target pane"))
+                .arg(split_direction_option())
+                .arg(option("workspace", "ID"))
+                .arg(flag("focus"))
+                .after_help(
+                    "Exactly one of --content or --file is required. Preview panes have no PTY or child process.",
+                ),
+        )
+        .subcommand(
+            Command::new("set")
+                .about("Update a preview pane")
+                .arg(required("pane_id", "PANE_ID"))
+                .arg(option("content", "TEXT"))
+                .arg(path_option("file", "PATH"))
+                .arg(option("type", "TYPE").value_parser(["text", "markdown"]))
+                .arg(option("title", "TITLE")),
+        )
+        .subcommand(
+            Command::new("close")
+                .about("Close a preview pane")
+                .arg(required("pane_id", "PANE_ID")),
         )
 }
 

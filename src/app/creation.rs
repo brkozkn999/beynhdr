@@ -318,8 +318,34 @@ impl App {
                 offset_from_bottom: metrics.offset_from_bottom as u64,
                 max_offset_from_bottom: metrics.max_offset_from_bottom as u64,
                 viewport_rows: metrics.viewport_rows as u64,
-            });
+            })
+            .or_else(|| self.preview_scroll_info(ws_idx, pane_id));
         Some(pane)
+    }
+
+    /// Scroll metrics for runtime-less preview panes, in the same
+    /// `PaneScrollInfo` shape. Viewport rows come from the last computed view
+    /// (0 when the pane is on a hidden surface).
+    fn preview_scroll_info(
+        &self,
+        ws_idx: usize,
+        pane_id: crate::layout::PaneId,
+    ) -> Option<crate::api::schema::PaneScrollInfo> {
+        let ws = self.state.workspaces.get(ws_idx)?;
+        let terminal = self
+            .state
+            .terminals
+            .get(&ws.pane_state(pane_id)?.attached_terminal_id)?;
+        let preview = terminal.preview.as_ref()?;
+        let viewport_rows = self
+            .state
+            .view
+            .pane_infos
+            .iter()
+            .find(|info| info.id == pane_id)
+            .map(|info| info.inner_rect.height as usize)
+            .unwrap_or(0);
+        Some(preview.scroll_metrics(viewport_rows))
     }
 
     pub(super) fn pane_metadata(
@@ -361,6 +387,13 @@ impl App {
             tokens: terminal.metadata_tokens.values(),
             agent_session: terminal_agent_session_info(terminal),
             scroll: None,
+            preview: terminal
+                .preview
+                .as_ref()
+                .map(|preview| crate::api::schema::PreviewPaneInfo {
+                    content_type: preview.content_type,
+                    content_bytes: preview.content.len() as u64,
+                }),
             revision: terminal.revision,
         })
     }

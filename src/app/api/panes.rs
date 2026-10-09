@@ -178,6 +178,9 @@ impl App {
         let Some((ws_idx, pane_id)) = self.parse_pane_id(&target.pane_id) else {
             return pane_not_found(id, &target.pane_id);
         };
+        if let Some(response) = self.preview_pane_rejection(&id, ws_idx, pane_id, &target.pane_id) {
+            return response;
+        }
         let Some(runtime) =
             self.state
                 .runtime_for_pane_in_workspace(&self.terminal_runtimes, ws_idx, pane_id)
@@ -198,6 +201,23 @@ impl App {
             self.state
                 .runtime_for_pane_in_workspace(&self.terminal_runtimes, ws_idx, pane_id)
         else {
+            // Runtime-less preview surfaces scroll their parsed lines.
+            if let Some(terminal_id) = self.state.terminal_id_for_pane(ws_idx, pane_id) {
+                if let Some(preview) = self
+                    .state
+                    .terminals
+                    .get_mut(&terminal_id)
+                    .and_then(|terminal| terminal.preview.as_mut())
+                {
+                    preview.set_scroll_from_bottom(Some(params.offset_from_bottom));
+                    self.render_dirty.request_generic();
+                    self.render_notify.notify_one();
+                    let Some(pane) = self.pane_info(ws_idx, pane_id) else {
+                        return pane_not_found(id, &params.pane_id);
+                    };
+                    return encode_success(id, ResponseResult::PaneInfo { pane });
+                }
+            }
             return pane_not_found(id, &params.pane_id);
         };
         runtime.set_scroll_offset_from_bottom(
@@ -213,6 +233,9 @@ impl App {
         let Some((ws_idx, pane_id)) = self.parse_pane_id(&target.pane_id) else {
             return pane_not_found(id, &target.pane_id);
         };
+        if let Some(response) = self.preview_pane_rejection(&id, ws_idx, pane_id, &target.pane_id) {
+            return response;
+        }
         let is_focused = self.state.active == Some(ws_idx)
             && self
                 .state
@@ -239,6 +262,15 @@ impl App {
                 format!("pane not found: {}", params.pane_id),
             ));
         };
+        if self
+            .preview_pane_rejection("selection", ws_idx, pane_id, &params.pane_id)
+            .is_some()
+        {
+            return Err((
+                "preview_pane",
+                format!("pane {} is a read-only preview pane", params.pane_id),
+            ));
+        }
         let Some(runtime) =
             self.state
                 .runtime_for_pane_in_workspace(&self.terminal_runtimes, ws_idx, pane_id)
@@ -297,6 +329,9 @@ impl App {
         let Some((ws_idx, pane_id)) = self.parse_pane_id(&params.pane_id) else {
             return pane_not_found(id, &params.pane_id);
         };
+        if let Some(response) = self.preview_pane_rejection(&id, ws_idx, pane_id, &params.pane_id) {
+            return response;
+        }
         let Some(runtime) =
             self.state
                 .runtime_for_pane_in_workspace(&self.terminal_runtimes, ws_idx, pane_id)
@@ -412,6 +447,9 @@ impl App {
         let Some((ws_idx, pane_id)) = self.parse_pane_id(&params.pane_id) else {
             return pane_not_found(id, &params.pane_id);
         };
+        if let Some(response) = self.preview_pane_rejection(&id, ws_idx, pane_id, &params.pane_id) {
+            return response;
+        }
         let Some(runtime) =
             self.state
                 .runtime_for_pane_in_workspace(&self.terminal_runtimes, ws_idx, pane_id)
@@ -531,6 +569,14 @@ impl App {
         let Some((ws_idx, pane_id)) = self.resolve_optional_pane(params.pane_id.as_deref()) else {
             return encode_error(id, "pane_not_found", "pane not found");
         };
+        if let Some(response) = self.preview_pane_rejection(
+            &id,
+            ws_idx,
+            pane_id,
+            params.pane_id.as_deref().unwrap_or("current"),
+        ) {
+            return response;
+        }
         let Some((runtime, _workspace_id)) = self.lookup_runtime(ws_idx, pane_id) else {
             return encode_error(id, "pane_not_found", "pane not found");
         };
@@ -1516,15 +1562,47 @@ impl App {
         let Some(public_pane_id) = self.public_pane_id(ws_idx, pane_id) else {
             return pane_not_found(id, &params.pane_id);
         };
-        let Some((pane, workspace_id)) = self.lookup_runtime(ws_idx, pane_id) else {
-            return pane_not_found(id, &params.pane_id);
-        };
         let Some(tab_idx) = self
             .state
             .workspaces
             .get(ws_idx)
             .and_then(|ws| ws.find_tab_index_for_pane(pane_id))
         else {
+            return pane_not_found(id, &params.pane_id);
+        };
+        // Preview panes have no terminal runtime; read returns the stored
+        // payload (honoring `lines` as a tail limit).
+        if let Some(terminal_id) = self.state.terminal_id_for_pane(ws_idx, pane_id) {
+            if let Some(terminal) = self
+                .state
+                .terminals
+                .get(&terminal_id)
+                .filter(|terminal| terminal.is_preview())
+            {
+                let content = terminal
+                    .preview
+                    .as_ref()
+                    .map(|preview| preview.content.as_str())
+                    .unwrap_or("");
+                let (text, truncated) = tail_lines(content, params.lines);
+                return encode_success(
+                    id,
+                    ResponseResult::PaneRead {
+                        read: PaneReadResult {
+                            pane_id: public_pane_id,
+                            workspace_id: self.public_workspace_id(ws_idx),
+                            tab_id: self.public_tab_id(ws_idx, tab_idx).unwrap(),
+                            source: params.source,
+                            format: params.format,
+                            text,
+                            revision: terminal.revision,
+                            truncated,
+                        },
+                    },
+                );
+            }
+        }
+        let Some((pane, workspace_id)) = self.lookup_runtime(ws_idx, pane_id) else {
             return pane_not_found(id, &params.pane_id);
         };
         let snapshot = crate::app::api_helpers::read_terminal_snapshot(
@@ -1917,6 +1995,9 @@ impl App {
         let Some((ws_idx, pane_id)) = self.parse_pane_id(&params.pane_id) else {
             return pane_not_found(id, &params.pane_id);
         };
+        if let Some(response) = self.preview_pane_rejection(&id, ws_idx, pane_id, &params.pane_id) {
+            return response;
+        }
         let Some(runtime) = self.lookup_runtime_sender(ws_idx, pane_id) else {
             return pane_not_found(id, &params.pane_id);
         };
@@ -1935,6 +2016,9 @@ impl App {
         let Some((ws_idx, pane_id)) = self.parse_pane_id(&params.pane_id) else {
             return pane_not_found(id, &params.pane_id);
         };
+        if let Some(response) = self.preview_pane_rejection(&id, ws_idx, pane_id, &params.pane_id) {
+            return response;
+        }
         let Some(runtime) = self.lookup_runtime_sender(ws_idx, pane_id) else {
             return pane_not_found(id, &params.pane_id);
         };
@@ -1970,28 +2054,65 @@ impl App {
         };
         let workspace_id = self.public_workspace_id(ws_idx);
         let layout_update_target = self.layout_update_target_after_pane_removal(ws_idx, pane_id);
+        // Preview overlay panes never emit `PaneDied` (no runtime), so the
+        // exit context that event normally provides is captured here while the
+        // pane is still in the layout and restored after removal below.
+        let preview_overlay = self
+            .is_preview_pane(ws_idx, pane_id)
+            .then(|| self.overlay_panes.remove(&pane_id))
+            .flatten()
+            .map(|overlay| {
+                let (was_overlay_active, was_overlay_focused_in_tab, tab_zoomed_before_exit) =
+                    self.overlay_exit_context(pane_id, &overlay);
+                (
+                    overlay,
+                    was_overlay_active,
+                    was_overlay_focused_in_tab,
+                    tab_zoomed_before_exit,
+                )
+            });
         if self.state.close_pane_would_close_workspace(ws_idx, pane_id) {
-            self.require_restored_group_close_ready(
-                &id,
-                &self.state.workspace_close_indices(ws_idx),
-            )?;
-            if self.state.confirm_implicit_worktree_group_close(ws_idx) {
-                return Err(encode_error(
-                    id,
-                    "confirmation_required",
-                    "closing this pane would close a worktree group",
-                ));
+            let close_check = self
+                .require_restored_group_close_ready(
+                    &id,
+                    &self.state.workspace_close_indices(ws_idx),
+                )
+                .and_then(|()| {
+                    self.state
+                        .confirm_implicit_worktree_group_close(ws_idx)
+                        .then(|| {
+                            encode_error(
+                                id.clone(),
+                                "confirmation_required",
+                                "closing this pane would close a worktree group",
+                            )
+                        })
+                        .map_or(Ok(()), Err)
+                });
+            if let Err(response) = close_check {
+                // The pane is still in the layout; put the overlay record back
+                // so a retried close can still restore focus/zoom.
+                if let Some((overlay, _, _, _)) = preview_overlay {
+                    self.overlay_panes.insert(pane_id, overlay);
+                }
+                return Err(response);
             }
         }
         let workspace_snapshot = self.workspace_info(ws_idx);
         let terminal_id = self.state.terminal_id_for_pane(ws_idx, pane_id);
         let should_close_workspace = {
             let Some(ws) = self.state.workspaces.get_mut(ws_idx) else {
+                if let Some((overlay, _, _, _)) = preview_overlay {
+                    self.overlay_panes.insert(pane_id, overlay);
+                }
                 return Err(pane_not_found(id, &target.pane_id));
             };
             ws.close_pane(pane_id)
         };
         self.state.remove_plugin_pane_records([pane_id]);
+        if let Some((overlay, was_active, was_focused, tab_zoomed)) = preview_overlay {
+            self.restore_overlay_after_exit(overlay, was_active, was_focused, tab_zoomed);
+        }
         if should_close_workspace {
             self.state.selected = ws_idx;
             self.state.close_selected_workspace();
@@ -2037,6 +2158,9 @@ impl App {
         let Some((ws_idx, pane_id)) = self.parse_pane_id(&params.pane_id) else {
             return pane_not_found(id, &params.pane_id);
         };
+        if let Some(response) = self.preview_pane_rejection(&id, ws_idx, pane_id, &params.pane_id) {
+            return response;
+        }
         let Some(runtime) = self.lookup_runtime_sender(ws_idx, pane_id) else {
             return pane_not_found(id, &params.pane_id);
         };
@@ -2085,6 +2209,23 @@ fn normalize_state_labels(
 
 fn pane_not_found(id: String, pane_id: &str) -> String {
     encode_error(id, "pane_not_found", format!("pane {pane_id} not found"))
+}
+
+/// `lines` as a tail limit over plain text content — mirrors the terminal
+/// `read` semantics for runtime-less preview panes. Returns `(text,
+/// truncated)`.
+fn tail_lines(content: &str, lines: Option<u32>) -> (String, bool) {
+    let Some(limit) = lines else {
+        return (content.to_string(), false);
+    };
+    let limit = limit as usize;
+    let total = content.lines().count();
+    if total <= limit {
+        return (content.to_string(), false);
+    }
+    let skipped = total - limit;
+    let text: String = content.lines().skip(skipped).collect::<Vec<_>>().join("\n");
+    (text, true)
 }
 
 impl App {

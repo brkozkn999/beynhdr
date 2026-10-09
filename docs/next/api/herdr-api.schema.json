@@ -878,6 +878,17 @@
             "pane_id": {
               "type": "string"
             },
+            "preview": {
+              "anyOf": [
+                {
+                  "$ref": "#/schemas/event/$defs/PreviewPaneInfo"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Present when the pane is a read-only preview surface (no PTY, no\nprocess). `terminal_id` still identifies the pane's backing surface."
+            },
             "restore_error": {
               "type": [
                 "string",
@@ -1095,6 +1106,32 @@
             "offset_from_bottom",
             "max_offset_from_bottom",
             "viewport_rows"
+          ],
+          "type": "object"
+        },
+        "PreviewContentType": {
+          "description": "Payload interpretation for a preview pane.",
+          "enum": [
+            "text",
+            "markdown"
+          ],
+          "type": "string"
+        },
+        "PreviewPaneInfo": {
+          "description": "Marks a `PaneInfo` as a read-only preview surface instead of a terminal.",
+          "properties": {
+            "content_bytes": {
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "content_type": {
+              "$ref": "#/schemas/event/$defs/PreviewContentType"
+            }
+          },
+          "required": [
+            "content_type",
+            "content_bytes"
           ],
           "type": "object"
         },
@@ -4056,6 +4093,157 @@
             }
           ]
         },
+        "PreviewCloseParams": {
+          "properties": {
+            "pane_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "pane_id"
+          ],
+          "type": "object"
+        },
+        "PreviewContentType": {
+          "description": "Payload interpretation for a preview pane.",
+          "enum": [
+            "text",
+            "markdown"
+          ],
+          "type": "string"
+        },
+        "PreviewOpenParams": {
+          "properties": {
+            "content": {
+              "description": "Inline UTF-8 content; exactly one of `content`/`content_file` is required.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "content_file": {
+              "description": "Server-side file path read once at open; same size limit as `content`.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "content_type": {
+              "$ref": "#/schemas/request/$defs/PreviewContentType"
+            },
+            "direction": {
+              "anyOf": [
+                {
+                  "$ref": "#/schemas/request/$defs/SplitDirection"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only valid with `placement: \"split\"` (defaults to `right`)."
+            },
+            "focus": {
+              "default": false,
+              "description": "Focus the new pane. Always on for `overlay`; optional for `split`/`tab`.",
+              "type": "boolean"
+            },
+            "placement": {
+              "anyOf": [
+                {
+                  "$ref": "#/schemas/request/$defs/PreviewPanePlacement"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "target_pane_id": {
+              "description": "Only valid with `placement: \"split\"` (defaults to the focused pane).",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "title": {
+              "description": "Border label for the pane. Must be non-empty after trimming.",
+              "type": "string"
+            },
+            "workspace_id": {
+              "description": "Only valid with `placement: \"tab\"`.",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "title",
+            "content_type"
+          ],
+          "type": "object"
+        },
+        "PreviewPanePlacement": {
+          "description": "How a preview pane joins the layout. Preview panes are runtime-less\nread-only surfaces, so the PTY-only `popup` and `zoomed` plugin placements\nare intentionally absent.",
+          "oneOf": [
+            {
+              "const": "overlay",
+              "description": "Zoomed overlay split off the active pane; closing restores the previous\nfocus and zoom state.",
+              "type": "string"
+            },
+            {
+              "const": "split",
+              "description": "Split an existing pane (defaults to the focused pane, to the right).",
+              "type": "string"
+            },
+            {
+              "const": "tab",
+              "description": "New tab holding only the preview pane.",
+              "type": "string"
+            }
+          ]
+        },
+        "PreviewSetParams": {
+          "properties": {
+            "content": {
+              "description": "Replacement content; mutually exclusive with `content_file`.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "content_file": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "content_type": {
+              "anyOf": [
+                {
+                  "$ref": "#/schemas/request/$defs/PreviewContentType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Change the payload interpretation; defaults to the current type."
+            },
+            "pane_id": {
+              "type": "string"
+            },
+            "title": {
+              "description": "Change the pane label; `null`/absent keeps the current label.",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "pane_id"
+          ],
+          "type": "object"
+        },
         "ProductAnnouncementDismissParams": {
           "properties": {
             "id": {
@@ -6635,11 +6823,43 @@
         {
           "properties": {
             "method": {
+              "const": "preview.open",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/schemas/request/$defs/PreviewOpenParams"
+            }
+          },
+          "required": [
+            "method",
+            "params"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "method": {
               "const": "bus.list",
               "type": "string"
             },
             "params": {
               "$ref": "#/schemas/request/$defs/BusListParams"
+            }
+          },
+          "required": [
+            "method",
+            "params"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "method": {
+              "const": "preview.set",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/schemas/request/$defs/PreviewSetParams"
             }
           },
           "required": [
@@ -6672,6 +6892,22 @@
             },
             "params": {
               "$ref": "#/schemas/request/$defs/BusAckParams"
+            }
+          },
+          "required": [
+            "method",
+            "params"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "method": {
+              "const": "preview.close",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/schemas/request/$defs/PreviewCloseParams"
             }
           },
           "required": [
@@ -8459,6 +8695,17 @@
             "pane_id": {
               "type": "string"
             },
+            "preview": {
+              "anyOf": [
+                {
+                  "$ref": "#/schemas/success_response/$defs/PreviewPaneInfo"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Present when the pane is a read-only preview surface (no PTY, no\nprocess). `terminal_id` still identifies the pane's backing surface."
+            },
             "restore_error": {
               "type": [
                 "string",
@@ -9691,6 +9938,32 @@
               "type": "string"
             }
           ]
+        },
+        "PreviewContentType": {
+          "description": "Payload interpretation for a preview pane.",
+          "enum": [
+            "text",
+            "markdown"
+          ],
+          "type": "string"
+        },
+        "PreviewPaneInfo": {
+          "description": "Marks a `PaneInfo` as a read-only preview surface instead of a terminal.",
+          "properties": {
+            "content_bytes": {
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "content_type": {
+              "$ref": "#/schemas/success_response/$defs/PreviewContentType"
+            }
+          },
+          "required": [
+            "content_type",
+            "content_bytes"
+          ],
+          "type": "object"
         },
         "ReadFormat": {
           "enum": [
@@ -10963,6 +11236,54 @@
                 },
                 "type": {
                   "const": "plugin_pane_closed",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "pane_id"
+              ],
+              "type": "object"
+            },
+            {
+              "properties": {
+                "pane": {
+                  "$ref": "#/schemas/success_response/$defs/PaneInfo"
+                },
+                "type": {
+                  "const": "preview_opened",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "pane"
+              ],
+              "type": "object"
+            },
+            {
+              "properties": {
+                "pane": {
+                  "$ref": "#/schemas/success_response/$defs/PaneInfo"
+                },
+                "type": {
+                  "const": "preview_updated",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "pane"
+              ],
+              "type": "object"
+            },
+            {
+              "properties": {
+                "pane_id": {
+                  "type": "string"
+                },
+                "type": {
+                  "const": "preview_closed",
                   "type": "string"
                 }
               },

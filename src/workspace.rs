@@ -20,7 +20,10 @@ mod git;
 mod tab;
 
 use self::git::git_status_cache_key_for_space;
-pub(crate) use self::{git::git_status_snapshot_for_cwd_with_demand, tab::MovedPane};
+pub(crate) use self::{
+    git::git_status_snapshot_for_cwd_with_demand,
+    tab::{MovedPane, SurfacePane},
+};
 pub use self::{
     git::{
         derive_label_from_cwd, fallback_label_from_cwd, git_branch, git_space_metadata,
@@ -844,6 +847,47 @@ impl Workspace {
         };
         self.register_new_pane_with_number(new_pane.pane_id, pane_number);
         Some(Ok((tab_idx, new_pane)))
+    }
+
+    /// Split `pane_id` with a runtime-less display surface (preview). Same
+    /// numbering and focus bookkeeping as `split_pane_with_runtime`, minus the
+    /// spawn and PTY sizing.
+    pub(crate) fn split_surface_pane(
+        &mut self,
+        pane_id: PaneId,
+        direction: Direction,
+        cwd: Option<PathBuf>,
+        focus_new_pane: bool,
+    ) -> Option<(usize, crate::workspace::tab::SurfacePane)> {
+        let tab_idx = self.find_tab_index_for_pane(pane_id)?;
+        let pane_number = self.next_public_pane_number;
+        let tab = &mut self.tabs[tab_idx];
+        let surface = tab.split_surface_pane(pane_id, focus_new_pane, direction, None, cwd)?;
+        self.register_new_pane_with_number(surface.pane_id, pane_number);
+        Some((tab_idx, surface))
+    }
+
+    /// Append a tab holding a single runtime-less display surface (preview).
+    /// Returns `(tab_idx, surface_terminal)`; the caller owns registering the
+    /// terminal state in `state.terminals`.
+    pub(crate) fn create_surface_tab(&mut self, cwd: PathBuf) -> (usize, TerminalState) {
+        let number = self.next_public_tab_number;
+        let pane_number = self.next_public_pane_number;
+        let (events, render_notify, render_dirty) = self
+            .active_tab()
+            .map(|tab| {
+                (
+                    tab.events.clone(),
+                    tab.render_notify.clone(),
+                    tab.render_dirty.clone(),
+                )
+            })
+            .expect("workspace must always have at least one tab");
+        self.next_public_tab_number += 1;
+        let (tab, terminal) = Tab::new_surface(number, cwd, events, render_notify, render_dirty);
+        self.register_new_pane_with_number(tab.root_pane, pane_number);
+        self.tabs.push(tab);
+        (self.tabs.len() - 1, terminal)
     }
 
     /// Close the focused pane. Returns true if the workspace should close.

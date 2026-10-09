@@ -480,6 +480,10 @@ pub struct PaneInfo {
     pub agent_session: Option<AgentSessionInfo>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub scroll: Option<PaneScrollInfo>,
+    /// Present when the pane is a read-only preview surface (no PTY, no
+    /// process). `terminal_id` still identifies the pane's backing surface.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub preview: Option<super::preview::PreviewPaneInfo>,
     pub revision: u64,
 }
 

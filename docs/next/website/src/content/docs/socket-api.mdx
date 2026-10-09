@@ -111,6 +111,7 @@ Raw socket method names use dot notation:
 | Events | `events.subscribe`, `events.wait` |
 | Integrations | `integration.install`, `integration.uninstall` |
 | Plugins | `plugin.link`, `plugin.list`, `plugin.unlink`, `plugin.enable`, `plugin.disable`, `plugin.action.list`, `plugin.action.invoke`, `plugin.log.list`, `plugin.pane.open`, `plugin.pane.focus`, `plugin.pane.close` |
+| Preview | `preview.open`, `preview.set`, `preview.close` |
 
 `agent.wait` is server-owned and event-driven. It pins the resolved pane occupant so a replacement cannot satisfy the wait. `agent.prompt` accepts an optional `wait` object with `until` and `timeout_ms`; this submits the prompt and starts the wait in one request, avoiding a race between separate calls. If the resolved agent is already `blocked`, `agent.prompt` returns `agent_blocked` without sending input or starting the wait.
 
@@ -611,6 +612,29 @@ the active popup and returns
 pane; tab panes can target a workspace. Split, tab, zoomed, and overlay panes
 behave like normal Herdr panes, and `plugin.pane.focus` and `plugin.pane.close`
 continue to operate on those panes.
+
+`preview.open` creates a read-only display pane with no PTY and no child
+process — the first plugin-facing surface that is not terminal-backed. It
+accepts `title`, `content_type` (`text` or `markdown`), exactly one of
+`content` or `content_file` (server-side path, UTF-8, 256 KiB maximum), and a
+`placement` of `overlay` (default), `split`, or `tab`. Overlay previews open
+as a zoomed overlay over the active pane and restore the previous focus and
+zoom state on close. `preview.set` replaces content, `content_type`, and/or
+`title` on an existing preview pane; `preview.close` removes it.
+
+```json
+{"id":"req_preview","method":"preview.open","params":{"title":"Build status","content_type":"markdown","content_file":"C:\\work\\status.md","placement":"split"}}
+{"id":"req_preview_set","method":"preview.set","params":{"pane_id":"w1:p2","content":"# Done\nAll green."}}
+{"id":"req_preview_close","method":"preview.close","params":{"pane_id":"w1:p2"}}
+```
+
+Preview panes are regular layout panes: they appear in `pane.list`,
+`pane.get`, and `session.snapshot` with a `preview` marker (`content_type`,
+`content_bytes`), `pane.read` returns the stored content, and `pane.scroll`
+and `pane.close` work on them. Runtime-dependent methods — sending input,
+selection/copy, process info, agent reporting, `pane.clear` — reject them
+with `preview_pane` or `not_preview_pane` where the operation is
+preview-specific.
 
 ## Socket transport
 

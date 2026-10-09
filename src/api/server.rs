@@ -712,6 +712,9 @@ pub(crate) fn api_method_name(method: &Method) -> &'static str {
         Method::BusList(_) => "bus.list",
         Method::BusRead(_) => "bus.read",
         Method::BusAck(_) => "bus.ack",
+        Method::PreviewOpen(_) => "preview.open",
+        Method::PreviewSet(_) => "preview.set",
+        Method::PreviewClose(_) => "preview.close",
     }
 }
 

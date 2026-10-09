@@ -199,6 +199,7 @@ fn pane_scroll_result(
                 max_offset_from_bottom,
                 viewport_rows,
             }),
+            preview: None,
             revision: 0,
         },
     }

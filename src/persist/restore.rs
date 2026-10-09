@@ -519,6 +519,22 @@ fn restore_tab(
             .unwrap_or_else(|| std::env::current_dir().unwrap_or_else(|_| "/".into()));
 
         let cwd = saved_cwd;
+        // Preview panes persist as content-only snapshots; restore recreates
+        // the runtime-less surface instead of spawning a shell.
+        if let Some(saved_preview) = saved_pane.and_then(|pane| pane.preview.as_ref()) {
+            let terminal_id = TerminalId::alloc();
+            let mut terminal = TerminalState::new(terminal_id.clone(), cwd.clone());
+            if let Some(label) = saved_pane.and_then(|pane| pane.label.clone()) {
+                terminal.set_manual_label(label);
+            }
+            terminal.set_preview(crate::preview::PreviewState::new(
+                saved_preview.content.clone(),
+                saved_preview.content_type,
+            ));
+            panes.insert(*id, PaneState::new(terminal_id));
+            terminals.push(terminal);
+            continue;
+        }
         let has_import = old_id.is_some_and(|old_id| imported_panes.contains_key(old_id));
         if !has_import && !cwd.is_dir() {
             let terminal = unavailable_restored_terminal(
@@ -1554,6 +1570,7 @@ mod tests {
                             }),
                             agent_resume: None,
                             launch_argv: None,
+                            preview: None,
                         },
                     )]),
                     zoomed: false,
@@ -1604,6 +1621,84 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn restore_recreates_preview_pane_without_runtime() {
+        let cwd = std::env::current_dir().unwrap();
+        let snapshot = SessionSnapshot {
+            version: super::super::snapshot::SNAPSHOT_VERSION,
+            workspaces: vec![WorkspaceSnapshot {
+                id: Some("w1".into()),
+                custom_name: None,
+                identity_cwd: cwd.clone(),
+                worktree_space: None,
+                public_pane_numbers: HashMap::from([(0, 1)]),
+                next_public_pane_number: 2,
+                public_tab_numbers: vec![1],
+                next_public_tab_number: 2,
+                tabs: vec![TabSnapshot {
+                    custom_name: None,
+                    layout: LayoutSnapshot::Pane(0),
+                    panes: HashMap::from([(
+                        0,
+                        super::super::snapshot::PaneSnapshot {
+                            cwd: cwd.clone(),
+                            label: Some("build notes".into()),
+                            agent_name: None,
+                            managed_agent_kind: None,
+                            agent_session: None,
+                            agent_resume: None,
+                            launch_argv: None,
+                            preview: Some(super::super::snapshot::PanePreviewSnapshot {
+                                content_type: crate::api::schema::PreviewContentType::Markdown,
+                                content: "# summary\n- item".into(),
+                            }),
+                        },
+                    )]),
+                    zoomed: false,
+                    focused: Some(0),
+                    root_pane: Some(0),
+                }],
+                active_tab: 0,
+            }],
+            active: Some(0),
+            selected: 0,
+            sidebar_width: None,
+            sidebar_section_split: None,
+            collapsed_space_keys: Default::default(),
+        };
+        let (events, _event_rx) = mpsc::channel(4);
+
+        let (workspaces, terminals, runtimes) = restore(
+            &snapshot,
+            None,
+            24,
+            80,
+            0,
+            test_restore_shell(),
+            crate::config::ShellModeConfig::NonLogin,
+            false,
+            events,
+            Arc::new(Notify::new()),
+            Arc::new(RenderSignal::new()),
+        );
+
+        let ws = &workspaces[0];
+        let root = ws.tabs[0].root_pane;
+        let terminal_id = ws.tabs[0].terminal_id(root).unwrap();
+        let terminal = &terminals[terminal_id];
+        let preview = terminal.preview.as_ref().expect("preview restored");
+        assert_eq!(
+            preview.content_type,
+            crate::api::schema::PreviewContentType::Markdown
+        );
+        assert_eq!(preview.content, "# summary\n- item");
+        assert_eq!(terminal.manual_label.as_deref(), Some("build notes"));
+        assert!(
+            !runtimes.contains_key(terminal_id),
+            "restored preview panes must not spawn a terminal runtime"
+        );
+    }
+
+    #[tokio::test]
     async fn restore_preserves_public_id_mapping_after_pane_id_remap() {
         let cwd = std::env::current_dir().unwrap();
         let snapshot = SessionSnapshot {
@@ -1636,6 +1731,7 @@ mod tests {
                                 agent_session: None,
                                 agent_resume: None,
                                 launch_argv: None,
+                                preview: None,
                             },
                         ),
                         (
@@ -1648,6 +1744,7 @@ mod tests {
                                 agent_session: None,
                                 agent_resume: None,
                                 launch_argv: None,
+                                preview: None,
                             },
                         ),
                     ]),
@@ -1702,6 +1799,7 @@ mod tests {
                     agent_session: None,
                     agent_resume: None,
                     launch_argv: None,
+                    preview: None,
                 },
             )
         };
@@ -1718,6 +1816,7 @@ mod tests {
             }),
             agent_resume: None,
             launch_argv: None,
+            preview: None,
         };
         let snapshot = SessionSnapshot {
             version: super::super::snapshot::SNAPSHOT_VERSION,
@@ -1870,6 +1969,7 @@ mod tests {
                             }),
                             agent_resume: None,
                             launch_argv: None,
+                            preview: None,
                         },
                     )]),
                     zoomed: false,
@@ -2176,6 +2276,7 @@ mod tests {
                 agent_session: None,
                 agent_resume: None,
                 launch_argv: None,
+                preview: None,
             },
         );
         let mut history = SessionHistorySnapshot {

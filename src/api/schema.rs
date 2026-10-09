@@ -9,6 +9,7 @@ pub mod integrations;
 pub mod lanes;
 pub mod panes;
 pub mod plugins;
+pub mod preview;
 pub mod response;
 pub mod server;
 pub mod session;
@@ -25,6 +26,7 @@ pub use integrations::*;
 pub use lanes::*;
 pub use panes::*;
 pub use plugins::*;
+pub use preview::*;
 pub use response::*;
 pub use server::*;
 pub use session::*;
@@ -267,6 +269,12 @@ pub enum Method {
     BusRead(BusReadParams),
     #[serde(rename = "bus.ack")]
     BusAck(BusAckParams),
+    #[serde(rename = "preview.open")]
+    PreviewOpen(PreviewOpenParams),
+    #[serde(rename = "preview.set")]
+    PreviewSet(PreviewSetParams),
+    #[serde(rename = "preview.close")]
+    PreviewClose(PreviewCloseParams),
 }
 
 #[cfg(test)]
