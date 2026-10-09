@@ -504,21 +504,92 @@ pub(super) fn render_panes(
                 && app.pane_exposes_host_cursor(ws_idx, info.id);
             rt.render(frame, info.inner_rect, show_cursor);
             render_pane_scrollbar(app, frame, info, rt);
-        } else if let Some(reason) = ws
+        } else if let Some(terminal) = ws
             .tabs
             .get(target.tab_index)
             .and_then(|tab| tab.terminal_id(info.id))
             .and_then(|id| app.terminals.get(id))
-            .and_then(|terminal| terminal.restore_error.as_deref())
         {
-            frame.render_widget(
-                Paragraph::new(reason).wrap(Wrap { trim: false }),
-                info.inner_rect,
-            );
+            if let Some(preview) = terminal.preview.as_ref() {
+                render_preview_pane(app, frame, info, preview);
+            } else if let Some(reason) = terminal.restore_error.as_deref() {
+                frame.render_widget(
+                    Paragraph::new(reason).wrap(Wrap { trim: false }),
+                    info.inner_rect,
+                );
+            }
         }
     }
 
     render_pane_borders(app, ws, pane_infos, split_borders, frame);
+}
+
+/// Draw a runtime-less preview surface: pre-parsed lines, clipped to the pane
+/// viewport at the configured scroll offset. Writes cells directly so the
+/// pane-scaled render loop does not allocate per line.
+fn render_preview_pane(
+    app: &AppState,
+    frame: &mut Frame,
+    info: &PaneInfo,
+    preview: &crate::preview::PreviewState,
+) {
+    let area = info.inner_rect;
+    if area.width == 0 || area.height == 0 {
+        return;
+    }
+    let (start, _) = preview.scroll_window(area.height as usize);
+    let palette = &app.palette;
+    let max_x = area.x.saturating_add(area.width);
+    let buf = frame.buffer_mut();
+    for (row, line) in preview.lines[start..]
+        .iter()
+        .take(area.height as usize)
+        .enumerate()
+    {
+        let y = area.y + row as u16;
+        if line.is_rule {
+            for x in area.x..max_x {
+                buf[(x, y)]
+                    .set_symbol("─")
+                    .set_style(Style::default().fg(palette.overlay0));
+            }
+            continue;
+        }
+        let mut x = area.x;
+        for span in &line.spans {
+            if x >= max_x {
+                break;
+            }
+            let style = preview_span_style(line, span, palette);
+            let (end_x, _) = buf.set_stringn(x, y, &span.text, (max_x - x) as usize, style);
+            if end_x <= x {
+                break;
+            }
+            x = end_x;
+        }
+    }
+}
+
+fn preview_span_style(
+    line: &crate::preview::PreviewLine,
+    span: &crate::preview::PreviewSpan,
+    palette: &Palette,
+) -> Style {
+    use crate::preview::PreviewSpanStyle;
+    let mut style = match span.style {
+        PreviewSpanStyle::Text => Style::default().fg(palette.text),
+        PreviewSpanStyle::Strong => Style::default()
+            .fg(palette.text)
+            .add_modifier(Modifier::BOLD),
+        PreviewSpanStyle::Emphasis => Style::default()
+            .fg(palette.text)
+            .add_modifier(Modifier::ITALIC),
+        PreviewSpanStyle::Code => Style::default().fg(palette.peach).bg(palette.surface_dim),
+    };
+    if line.heading.is_some() {
+        style = style.fg(palette.accent).add_modifier(Modifier::BOLD);
+    }
+    style
 }
 
 pub(crate) fn popup_pane_rects(app: &AppState, area: Rect) -> Option<(Rect, Rect)> {

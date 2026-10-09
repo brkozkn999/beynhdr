@@ -236,6 +236,7 @@ fn reply_to_probe(request: ApiRequestMessage) {
                 tokens: Default::default(),
                 agent_session: None,
                 scroll: None,
+                preview: None,
                 revision: 0,
             },
         },

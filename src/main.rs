@@ -41,6 +41,7 @@ mod plugin_command;
 mod plugin_installations;
 mod plugin_paths;
 mod popup_size;
+mod preview;
 mod product_announcements;
 mod protocol;
 mod pty;

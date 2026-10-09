@@ -111,6 +111,16 @@ pub struct PaneSnapshot {
     pub agent_resume: Option<PaneAgentResumeSnapshot>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub launch_argv: Option<Vec<String>>,
+    /// Read-only preview payload (`preview.open` panes). Restores as a
+    /// runtime-less preview surface instead of spawning a shell.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub preview: Option<PanePreviewSnapshot>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PanePreviewSnapshot {
+    pub content_type: crate::api::schema::PreviewContentType,
+    pub content: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -378,6 +388,12 @@ fn capture_tab(
                 agent: resume.agent.clone(),
                 argv: resume.argv.clone(),
             });
+        let preview = terminal
+            .and_then(|terminal| terminal.preview.as_ref())
+            .map(|preview| PanePreviewSnapshot {
+                content_type: preview.content_type,
+                content: preview.content.clone(),
+            });
         panes.insert(
             id.raw(),
             PaneSnapshot {
@@ -388,6 +404,7 @@ fn capture_tab(
                 agent_session,
                 agent_resume,
                 launch_argv,
+                preview,
             },
         );
     }
@@ -632,6 +649,36 @@ mod tests {
     }
 
     #[test]
+    fn capture_persists_preview_content_without_runtime() {
+        let mut state = state_with_workspaces(&["preview-snapshot"]);
+        let root = state.workspaces[0].tabs[0].root_pane;
+        let terminal_id = state.workspaces[0].tabs[0].panes[&root]
+            .attached_terminal_id
+            .clone();
+        state.terminals.get_mut(&terminal_id).unwrap().set_preview(
+            crate::preview::PreviewState::new(
+                "# notes".to_string(),
+                crate::api::schema::PreviewContentType::Markdown,
+            ),
+        );
+
+        let snapshot = capture_from_state(&state);
+        let pane = &snapshot.workspaces[0].tabs[0].panes[&root.raw()];
+        let preview = pane.preview.as_ref().expect("preview payload captured");
+        assert_eq!(
+            preview.content_type,
+            crate::api::schema::PreviewContentType::Markdown
+        );
+        assert_eq!(preview.content, "# notes");
+
+        // Serialization round-trip keeps the payload (and absent preview stays absent).
+        let json = serde_json::to_string(&snapshot).unwrap();
+        let restored: SessionSnapshot = serde_json::from_str(&json).unwrap();
+        let pane = &restored.workspaces[0].tabs[0].panes[&root.raw()];
+        assert_eq!(pane.preview.as_ref().unwrap().content, "# notes");
+    }
+
+    #[test]
     fn layout_fingerprint_survives_json_round_trip() {
         let mut snapshot = parse_snapshot(include_str!(
             "../../tests/fixtures/session/current-herdr-session.json"
@@ -707,6 +754,7 @@ mod tests {
                 agent_session: None,
                 agent_resume: None,
                 launch_argv: None,
+                preview: None,
             },
         );
         panes.insert(
@@ -719,6 +767,7 @@ mod tests {
                 agent_session: None,
                 agent_resume: None,
                 launch_argv: None,
+                preview: None,
             },
         );
 
@@ -1405,6 +1454,7 @@ mod tests {
                 agent_session: None,
                 agent_resume: None,
                 launch_argv: None,
+                preview: None,
             },
         );
         panes.insert(
@@ -1419,6 +1469,7 @@ mod tests {
                 agent_session: None,
                 agent_resume: None,
                 launch_argv: None,
+                preview: None,
             },
         );
 

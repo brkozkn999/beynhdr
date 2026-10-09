@@ -269,6 +269,9 @@ impl App {
         if !self.state.pane_visible_on_active_surface(ws_idx, pane_id) {
             return Err(error("stale_target", "pane is no longer visible"));
         }
+        if let Some(response) = self.preview_pane_rejection(id, ws_idx, pane_id, &params.pane_id) {
+            return Err(response);
+        }
         let Some(runtime) =
             self.state
                 .runtime_for_pane_in_workspace(&self.terminal_runtimes, ws_idx, pane_id)

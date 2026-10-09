@@ -24,6 +24,14 @@ pub struct NewPane {
     pub runtime: TerminalRuntime,
 }
 
+/// A pane surface with no terminal runtime — used by `preview.open`. The
+/// `TerminalState` supplies pane identity (labels, cwd, public ids) but the
+/// pane never owns a PTY or child process.
+pub(crate) struct SurfacePane {
+    pub pane_id: PaneId,
+    pub terminal: TerminalState,
+}
+
 enum SplitCommand<'a> {
     Shell {
         command: &'a str,
@@ -195,6 +203,66 @@ impl Tab {
             terminal,
             runtime,
         ))
+    }
+
+    /// Build a tab whose single pane is a runtime-less display surface. No PTY
+    /// is spawned; the returned `TerminalState` carries pane identity only.
+    pub(crate) fn new_surface(
+        number: usize,
+        cwd: PathBuf,
+        events: mpsc::Sender<AppEvent>,
+        render_notify: Arc<Notify>,
+        render_dirty: Arc<RenderSignal>,
+    ) -> (Self, TerminalState) {
+        let (layout, root_id) = TileLayout::new();
+        let terminal_id = TerminalId::alloc();
+        let terminal = TerminalState::new(terminal_id.clone(), cwd);
+        let mut panes = HashMap::new();
+        panes.insert(root_id, PaneState::new(terminal_id));
+        (
+            Self {
+                custom_name: None,
+                number,
+                root_pane: root_id,
+                layout,
+                panes,
+                #[cfg(test)]
+                runtimes: HashMap::new(),
+                zoomed: false,
+                events,
+                render_notify,
+                render_dirty,
+            },
+            terminal,
+        )
+    }
+
+    /// Split `target` with a runtime-less display surface. Same layout and
+    /// focus contract as `split_pane_with_runtime`, minus the spawn.
+    pub(crate) fn split_surface_pane(
+        &mut self,
+        target: PaneId,
+        focus_new_pane: bool,
+        direction: Direction,
+        ratio: Option<f32>,
+        cwd: Option<PathBuf>,
+    ) -> Option<SurfacePane> {
+        let new_id = self
+            .layout
+            .split_pane(target, direction, ratio.unwrap_or(0.5))?;
+        let actual_cwd =
+            cwd.unwrap_or_else(|| std::env::current_dir().unwrap_or_else(|_| "/".into()));
+        let terminal_id = TerminalId::alloc();
+        if focus_new_pane {
+            self.layout.focus_pane(new_id);
+        }
+        self.panes
+            .insert(new_id, PaneState::new(terminal_id.clone()));
+        self.zoomed = false;
+        Some(SurfacePane {
+            pane_id: new_id,
+            terminal: TerminalState::new(terminal_id, actual_cwd),
+        })
     }
 
     pub fn is_auto_named(&self) -> bool {

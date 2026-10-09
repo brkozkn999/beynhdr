@@ -267,6 +267,15 @@ pub enum ResponseResult {
     PluginPaneClosed {
         pane_id: String,
     },
+    PreviewOpened {
+        pane: PaneInfo,
+    },
+    PreviewUpdated {
+        pane: PaneInfo,
+    },
+    PreviewClosed {
+        pane_id: String,
+    },
     ConfigReload {
         status: crate::config::ConfigReloadStatus,
         diagnostics: Vec<String>,

@@ -162,6 +162,10 @@ pub struct TerminalState {
     agent_process_acquisition_pending: bool,
     pub pending_agent_resume_plan: Option<crate::agent_resume::AgentResumePlan>,
     pub restore_error: Option<String>,
+    /// Read-only preview payload (`preview.open`). Present instead of a PTY
+    /// runtime: the pane keeps a `TerminalState` for layout/identity but never
+    /// has a live `TerminalRuntime` or child process.
+    pub preview: Option<crate::preview::PreviewState>,
 }
 
 impl TerminalState {
@@ -202,7 +206,19 @@ impl TerminalState {
             agent_process_acquisition_pending: false,
             pending_agent_resume_plan: None,
             restore_error: None,
+            preview: None,
         }
+    }
+
+    /// Attach a read-only preview payload to this terminal identity. Callers
+    /// must ensure the terminal never gets a `TerminalRuntime`.
+    pub fn set_preview(&mut self, preview: crate::preview::PreviewState) {
+        self.preview = Some(preview);
+        self.revision = self.revision.wrapping_add(1);
+    }
+
+    pub fn is_preview(&self) -> bool {
+        self.preview.is_some()
     }
 
     pub fn set_detected_agent_process_at(

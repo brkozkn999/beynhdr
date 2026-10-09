@@ -7,6 +7,7 @@ mod integrations;
 mod layouts;
 mod panes;
 pub(crate) mod plugins;
+mod preview;
 pub(super) mod responses;
 mod session;
 mod tabs;
@@ -280,17 +281,8 @@ impl App {
 
         let overlay_state = if let AppEvent::PaneDied { pane_id, .. } = &ev {
             self.overlay_panes.remove(pane_id).map(|overlay| {
-                let was_overlay_active =
-                    self.state
-                        .is_active_pane(overlay.ws_idx, overlay.tab_idx, *pane_id);
-                let tab_before_exit = self
-                    .state
-                    .workspaces
-                    .get(overlay.ws_idx)
-                    .and_then(|ws| ws.tabs.get(overlay.tab_idx));
-                let was_overlay_focused_in_tab =
-                    tab_before_exit.is_some_and(|tab| tab.layout.focused() == *pane_id);
-                let tab_zoomed_before_exit = tab_before_exit.map(|tab| tab.zoomed);
+                let (was_overlay_active, was_overlay_focused_in_tab, tab_zoomed_before_exit) =
+                    self.overlay_exit_context(*pane_id, &overlay);
                 (
                     overlay,
                     was_overlay_active,
@@ -494,6 +486,34 @@ impl App {
                 }
             }
         }
+    }
+
+    /// Context an overlay close needs, captured while the overlay pane is
+    /// still present in the layout: whether it was the focused pane on the
+    /// active surface, whether it was the tab's focused pane at all, and the
+    /// tab's zoom flag before removal. Shared by the `PaneDied` path and
+    /// `preview.close` (previews never emit `PaneDied`).
+    fn overlay_exit_context(
+        &self,
+        pane_id: crate::layout::PaneId,
+        overlay: &OverlayPaneState,
+    ) -> (bool, bool, Option<bool>) {
+        let was_overlay_active =
+            self.state
+                .is_active_pane(overlay.ws_idx, overlay.tab_idx, pane_id);
+        let tab_before_exit = self
+            .state
+            .workspaces
+            .get(overlay.ws_idx)
+            .and_then(|ws| ws.tabs.get(overlay.tab_idx));
+        let was_overlay_focused_in_tab =
+            tab_before_exit.is_some_and(|tab| tab.layout.focused() == pane_id);
+        let tab_zoomed_before_exit = tab_before_exit.map(|tab| tab.zoomed);
+        (
+            was_overlay_active,
+            was_overlay_focused_in_tab,
+            tab_zoomed_before_exit,
+        )
     }
 
     fn restore_overlay_after_exit(
@@ -1255,6 +1275,15 @@ impl App {
             }
             Method::PluginPaneClose(params) => {
                 return self.handle_plugin_pane_close(request.id, params);
+            }
+            Method::PreviewOpen(params) => {
+                return self.handle_preview_open(request.id, params);
+            }
+            Method::PreviewSet(params) => {
+                return self.handle_preview_set(request.id, params);
+            }
+            Method::PreviewClose(params) => {
+                return self.handle_preview_close(request.id, params);
             }
             _ => {
                 return responses::encode_error(

@@ -331,6 +331,16 @@ Metadata text is normalized before storage. Herdr trims surrounding whitespace, 
 
 `--source` and `--applies-to-source` must be 80 characters or fewer and may contain only ASCII letters, digits, colon, dot, underscore, and hyphen. `--ttl-ms` makes metadata expire automatically and must be between `1` and `86400000` milliseconds. Omit it for metadata that should stay until replaced, cleared, or the pane closes. `--seq` lets Herdr ignore stale reports from the same `--source`; stale reports are accepted by the API but ignored by pane state. A pane or workspace accepts sequenced token reports from at most 32 distinct sources during its lifetime; clearing or expiry does not release those source slots.
 
+Read-only preview panes (no shell, no process):
+
+```bash
+herdr preview open --title TEXT (--content TEXT | --content-file PATH) [--content-type text|markdown] [--placement overlay|split|tab] [--workspace ID] [--target-pane PANE] [--direction right|down] [--focus|--no-focus]
+herdr preview set <pane_id> [--content TEXT | --content-file PATH] [--content-type text|markdown] [--title TEXT]
+herdr preview close <pane_id>
+```
+
+`preview open` creates a display-only pane that renders API-supplied text or minimal Markdown — it never spawns a PTY or child process. `overlay` (the default) opens zoomed over the active pane and restores the previous focus on close; `split` divides the target pane; `tab` opens a new tab. Content is capped at 256 KiB. Preview panes appear in `pane list`/`pane get` with a `preview` marker, `pane read` returns the stored content, and `pane scroll` works; runtime operations such as `send-text`, `send-keys`, and `process-info` reject them with `preview_pane`. `preview set` replaces content or title; `preview close` (or `pane close`) removes the pane.
+
 ## Agents
 
 For the pane-versus-agent model and complete orchestration examples, see [Agent automation](/docs/agent-automation/).
@@ -530,7 +540,9 @@ layout. `--width` and `--height` set the outer popup dimensions in terminal
 cells or percentages such as `80%`; omitted dimensions default to half the
 terminal size, and values smaller than the popup minimum are clamped. A popup
 is not a Herdr pane, does not export `HERDR_PANE_ID`, and does not participate
-in pane or agent APIs. Native non-terminal plugin panes are outside plugin v1.
+in pane or agent APIs. Plugin panes stay terminal-backed; for a non-terminal
+display surface use `herdr preview` / `preview.open`, which renders
+API-supplied text or Markdown in a read-only pane without a PTY.
 
 New panes identify as `TERM_PROGRAM=herdr`, with `TERM_PROGRAM_VERSION` set to
 Herdr's version. They keep `TERM=xterm-256color` and `COLORTERM=truecolor`.

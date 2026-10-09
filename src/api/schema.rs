@@ -7,6 +7,7 @@ pub mod events;
 pub mod integrations;
 pub mod panes;
 pub mod plugins;
+pub mod preview;
 pub mod response;
 pub mod server;
 pub mod session;
@@ -21,6 +22,7 @@ pub use events::*;
 pub use integrations::*;
 pub use panes::*;
 pub use plugins::*;
+pub use preview::*;
 pub use response::*;
 pub use server::*;
 pub use session::*;
@@ -249,6 +251,12 @@ pub enum Method {
     PluginPaneFocus(PluginPaneFocusParams),
     #[serde(rename = "plugin.pane.close")]
     PluginPaneClose(PluginPaneCloseParams),
+    #[serde(rename = "preview.open")]
+    PreviewOpen(PreviewOpenParams),
+    #[serde(rename = "preview.set")]
+    PreviewSet(PreviewSetParams),
+    #[serde(rename = "preview.close")]
+    PreviewClose(PreviewCloseParams),
 }
 
 #[cfg(test)]
