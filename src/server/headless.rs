@@ -1961,6 +1961,7 @@ impl HeadlessServer {
                 let location =
                     crate::server::clients::ClientShellLocation::from_snapshot(&seed_snapshot);
                 let agent_view = self.app.state.agent_view_override.clone();
+                let sidebar_provisions = self.app.state.merged_sidebar_provisions();
                 let projection_message = match agent_view.as_ref() {
                     Some(view) => match crate::protocol::endpoint::agent_view_projection_message(
                         &seed_snapshot.boot_id,
@@ -1973,6 +1974,23 @@ impl HeadlessServer {
                             return false;
                         }
                     },
+                    None => None,
+                };
+                let sidebar_provisions_message = match sidebar_provisions.as_ref() {
+                    Some(provisions) => {
+                        match crate::protocol::endpoint::sidebar_provisions_message(
+                            &seed_snapshot.boot_id,
+                            seed_snapshot.revision,
+                            &provisions.agents,
+                            &provisions.spaces,
+                        ) {
+                            Ok(message) => Some(message),
+                            Err(err) => {
+                                warn!(client_id, err = %err, "failed to encode sidebar provisions");
+                                return false;
+                            }
+                        }
+                    }
                     None => None,
                 };
                 let snapshot_message =
@@ -1996,11 +2014,15 @@ impl HeadlessServer {
                 connection.shell_snapshot = Some(seed_snapshot);
                 connection.shell_agent_completions = Some(completion_projection);
                 connection.shell_agent_view = agent_view;
+                connection.shell_sidebar_provisions = sidebar_provisions;
                 self.clients.insert(client_id, connection);
                 if self.app.state.popup_pane.is_some() && self.popup_owner_tab_id.is_none() {
                     self.popup_owner_tab_id = self.shell_tab_id_for_client(client_id);
                 }
                 if let Some(message) = projection_message {
+                    self.send_to_client(client_id, message);
+                }
+                if let Some(message) = sidebar_provisions_message {
                     self.send_to_client(client_id, message);
                 }
                 self.send_to_client(client_id, completion_message);

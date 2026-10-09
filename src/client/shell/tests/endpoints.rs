@@ -1555,6 +1555,135 @@ fn newer_snapshot_does_not_reuse_stale_agent_view_projection() {
 }
 
 #[test]
+fn sidebar_provisions_render_only_for_the_provisioning_endpoint() {
+    use crate::config::{AgentSidebarToken, SpaceSidebarToken};
+
+    let (mut state, remote) = state_with_remote();
+    let mut remote_snapshot = snapshot();
+    remote_snapshot.boot_id = "remote-boot".into();
+    remote_snapshot.workspaces[0].label = "remote-workspace".into();
+    remote_snapshot.workspaces[0]
+        .tokens
+        .push(("wsnote".into(), "ws-note".into()));
+    let mut remote_agent = agent("remote agent", crate::api::schema::AgentStatus::Idle, 1);
+    remote_agent
+        .tokens
+        .push(("owner".into(), "plugin-owner".into()));
+    remote_snapshot.agents = vec![remote_agent];
+    state.set_endpoint_snapshot(&remote, Box::new(remote_snapshot));
+
+    state.set_test_endpoint_sidebar_provisions(
+        &remote,
+        vec![vec![AgentSidebarToken::Custom("owner".into())]],
+        vec![vec![SpaceSidebarToken::Custom("wsnote".into())]],
+    );
+    state.set_test_endpoint_sidebar_provisions(
+        &ClientEndpointId::Local,
+        vec![vec![AgentSidebarToken::Custom("absent".into())]],
+        Vec::new(),
+    );
+
+    let remote_endpoint = state
+        .endpoints
+        .iter()
+        .find(|endpoint| endpoint.endpoint_id == remote)
+        .expect("remote endpoint");
+    let remote_provisions =
+        ClientShellState::endpoint_sidebar_provisions(remote_endpoint).expect("provisions");
+    assert_eq!(remote_provisions.agent_rows.len(), 1);
+    assert_eq!(remote_provisions.space_rows.len(), 1);
+    // The local endpoint's row resolves empty (no `$absent` token) and drops.
+    let local_endpoint = state
+        .endpoints
+        .iter()
+        .find(|endpoint| endpoint.endpoint_id.is_local())
+        .expect("local endpoint");
+    assert_eq!(
+        ClientShellState::endpoint_sidebar_provisions(local_endpoint)
+            .map(|provisions| provisions.agent_rows.len()),
+        Some(1)
+    );
+
+    let frame = state.compose(100, 28).expect("combined endpoint frame");
+    let text = frame
+        .cells
+        .chunks(frame.width as usize)
+        .map(|row| {
+            row.iter()
+                .map(|cell| cell.symbol.as_str())
+                .collect::<String>()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    assert!(text.contains("plugin-owner"), "frame: {text}");
+    assert!(text.contains("ws-note"), "frame: {text}");
+}
+
+#[test]
+fn sidebar_provisions_wait_for_their_snapshot_revision() {
+    use crate::config::AgentSidebarToken;
+
+    fn find_endpoint<'a>(
+        state: &'a ClientShellState,
+        endpoint_id: &ClientEndpointId,
+    ) -> &'a ClientShellEndpoint {
+        state
+            .endpoints
+            .iter()
+            .find(|endpoint| &endpoint.endpoint_id == endpoint_id)
+            .expect("remote endpoint")
+    }
+
+    let (mut state, remote) = state_with_remote();
+    let projection =
+        |boot_id: &str, revision: u64| crate::client::endpoint::DecodedSidebarProvisions {
+            boot_id: boot_id.into(),
+            revision,
+            agent_rows: vec![vec![AgentSidebarToken::Agent]],
+            space_rows: Vec::new(),
+        };
+
+    // Bound to generation 4 but the cached snapshot is generation-less.
+    state.set_endpoint_sidebar_provisions_for_generation(&remote, 4, projection("remote-boot", 7));
+    assert!(
+        ClientShellState::endpoint_sidebar_provisions(find_endpoint(&state, &remote)).is_none()
+    );
+
+    // A revision older than the projection leaves it without matching rows;
+    // controls are revision-bound, so the server re-sends them against the
+    // revision that will carry them.
+    let mut landed = snapshot();
+    landed.boot_id = "remote-boot".into();
+    landed.revision = 6;
+    state.cache_endpoint_snapshot_for_generation(&remote, 4, Box::new(landed));
+    assert!(
+        ClientShellState::endpoint_sidebar_provisions(find_endpoint(&state, &remote)).is_none()
+    );
+
+    // The matching revision applies the re-sent projection.
+    state.set_endpoint_sidebar_provisions_for_generation(&remote, 4, projection("remote-boot", 7));
+    let mut landed = snapshot();
+    landed.boot_id = "remote-boot".into();
+    landed.revision = 7;
+    state.cache_endpoint_snapshot_for_generation(&remote, 4, Box::new(landed));
+    assert_eq!(
+        ClientShellState::endpoint_sidebar_provisions(find_endpoint(&state, &remote))
+            .map(|provisions| provisions.agent_rows.len()),
+        Some(1)
+    );
+
+    // A foreign boot can never apply.
+    state.set_endpoint_sidebar_provisions_for_generation(&remote, 4, projection("other-boot", 8));
+    let mut landed = snapshot();
+    landed.boot_id = "remote-boot".into();
+    landed.revision = 8;
+    state.cache_endpoint_snapshot_for_generation(&remote, 4, Box::new(landed));
+    assert!(
+        ClientShellState::endpoint_sidebar_provisions(find_endpoint(&state, &remote)).is_none()
+    );
+}
+
+#[test]
 fn legacy_custom_views_keep_v1_per_endpoint_projection() {
     use crate::api::schema::AgentStatus;
     use crate::config::AgentSidebarToken;

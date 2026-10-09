@@ -23,6 +23,7 @@ mod ids;
 mod popup;
 mod runtime;
 mod session;
+pub(crate) mod sidebar_provision;
 pub mod state;
 mod tab_bar_status;
 mod terminal_targets;
@@ -549,6 +550,7 @@ impl App {
             agent_view_override: None,
             sidebar_agents: config.ui.sidebar.agents.clone(),
             sidebar_spaces: config.ui.sidebar.spaces.clone(),
+            sidebar_provisions: std::collections::BTreeMap::new(),
             next_agent_state_change_seq: 0,
             confirm_close: config.ui.confirm_close,
             pane_borders: config.ui.pane_borders,

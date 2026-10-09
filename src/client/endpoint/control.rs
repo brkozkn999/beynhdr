@@ -6,12 +6,31 @@ pub(crate) struct DecodedAgentViewProjection {
     pub(crate) view: Result<Option<crate::api::schema::AgentViewSetParams>, ()>,
 }
 
+/// Server-side session rows for the sidebar, bound to a snapshot revision.
+/// Rows the local build cannot decode are skipped individually.
+pub(crate) struct DecodedSidebarProvisions {
+    pub(crate) boot_id: String,
+    pub(crate) revision: u64,
+    pub(crate) agent_rows: Vec<Vec<crate::config::AgentSidebarToken>>,
+    pub(crate) space_rows: Vec<Vec<crate::config::SpaceSidebarToken>>,
+}
+
 pub(crate) enum EndpointControlMessage {
     HealthPong,
     AgentViewProjection(DecodedAgentViewProjection),
     AgentCompletions(crate::protocol::endpoint::EndpointAgentCompletions),
+    SidebarProvisions(DecodedSidebarProvisions),
     Snapshot(Box<crate::protocol::ClientShellSnapshot>),
     Ignored,
+}
+
+/// Decode opaque provisioned rows, skipping any the local build cannot parse.
+fn decode_sidebar_rows<T: serde::de::DeserializeOwned>(
+    rows: Vec<serde_json::Value>,
+) -> Vec<Vec<T>> {
+    rows.into_iter()
+        .filter_map(|row| serde_json::from_value(row).ok())
+        .collect()
 }
 
 pub(crate) fn decode_endpoint_control(
@@ -50,6 +69,21 @@ pub(crate) fn decode_endpoint_control(
                 boot_id: projection.boot_id,
                 revision: projection.revision,
                 view,
+            },
+        ));
+    }
+    if kind == crate::protocol::endpoint::SIDEBAR_PROVISIONS_KIND {
+        let Ok(projection): Result<crate::protocol::endpoint::EndpointSidebarProvisions, _> =
+            serde_json::from_str(data)
+        else {
+            return Ok(EndpointControlMessage::Ignored);
+        };
+        return Ok(EndpointControlMessage::SidebarProvisions(
+            DecodedSidebarProvisions {
+                boot_id: projection.boot_id,
+                revision: projection.revision,
+                agent_rows: decode_sidebar_rows(projection.agent_rows),
+                space_rows: decode_sidebar_rows(projection.space_rows),
             },
         ));
     }
@@ -150,6 +184,56 @@ mod tests {
             panic!("decoded projection");
         };
         assert_eq!(decoded.view, Err(()));
+    }
+
+    #[test]
+    fn sidebar_provisions_round_trip_and_skip_undecodable_rows() {
+        use crate::config::{AgentSidebarToken, SpaceSidebarToken};
+
+        let crate::protocol::ServerMessage::EndpointControl { kind, data } =
+            crate::protocol::endpoint::sidebar_provisions_message(
+                "boot",
+                7,
+                &[vec![AgentSidebarToken::Workspace]],
+                &[vec![SpaceSidebarToken::Branch]],
+            )
+            .unwrap()
+        else {
+            panic!("expected provisions control");
+        };
+        let EndpointControlMessage::SidebarProvisions(decoded) =
+            decode_endpoint_control(&kind, &data).unwrap()
+        else {
+            panic!("expected sidebar provisions");
+        };
+        assert_eq!(decoded.boot_id, "boot");
+        assert_eq!(decoded.revision, 7);
+        assert_eq!(decoded.agent_rows, vec![vec![AgentSidebarToken::Workspace]]);
+        assert_eq!(decoded.space_rows, vec![vec![SpaceSidebarToken::Branch]]);
+
+        // Rows a build cannot decode are dropped individually; a malformed
+        // envelope is ignored like any unknown optional control.
+        let projection = crate::protocol::endpoint::EndpointSidebarProvisions {
+            boot_id: "boot".into(),
+            revision: 8,
+            agent_rows: vec![
+                serde_json::json!(["agent"]),
+                serde_json::json!([{ "token": "future_token_xyz" }]),
+                serde_json::json!("not a row"),
+            ],
+            space_rows: vec![serde_json::json!(["workspace"])],
+        };
+        let EndpointControlMessage::SidebarProvisions(decoded) =
+            decode_endpoint_control(&kind, &serde_json::to_string(&projection).unwrap()).unwrap()
+        else {
+            panic!("expected sidebar provisions");
+        };
+        assert_eq!(decoded.agent_rows, vec![vec![AgentSidebarToken::Agent]]);
+        assert_eq!(decoded.space_rows, vec![vec![SpaceSidebarToken::Workspace]]);
+        assert!(matches!(
+            decode_endpoint_control(&kind, "not json").unwrap(),
+            EndpointControlMessage::Ignored
+        ));
     }
 
     #[test]

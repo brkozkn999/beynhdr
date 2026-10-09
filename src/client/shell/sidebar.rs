@@ -206,6 +206,15 @@ pub(crate) fn render_sidebar(
 ) {
     let palette = &config.palette;
     render_sidebar_background(buffer, area, palette);
+    // Provisioned rows belong to the endpoint that produced this snapshot.
+    let provisioned = state
+        .endpoints
+        .iter()
+        .find(|endpoint| endpoint.endpoint_id == *state.active_endpoint_id)
+        .and_then(ClientShellState::endpoint_sidebar_provisions);
+    let provisioned_spaces: &[Vec<crate::config::SpaceSidebarToken>] = provisioned
+        .map(|provisions| provisions.space_rows.as_slice())
+        .unwrap_or(&[]);
     hits.sidebar_divider = if area.is_empty() {
         Rect::default()
     } else {
@@ -248,6 +257,7 @@ pub(crate) fn render_sidebar(
                         displayed_workspace_status(snapshot, workspace, state.collapsed_groups),
                         entry.indented,
                         &config.spaces,
+                        provisioned_spaces,
                     )
                     .len()
                     .max(1)
@@ -304,7 +314,13 @@ pub(crate) fn render_sidebar(
             continue;
         };
         let status = displayed_workspace_status(snapshot, workspace, state.collapsed_groups);
-        let rows = workspace_rows(workspace, status, entry.indented, &config.spaces);
+        let rows = workspace_rows(
+            workspace,
+            status,
+            entry.indented,
+            &config.spaces,
+            provisioned_spaces,
+        );
         let row_height = (rows.len().max(1).min(u16::MAX as usize) as u16).min(body.height);
         if y.saturating_add(row_height) > body.bottom() {
             break;
@@ -435,6 +451,9 @@ pub(crate) fn render_sidebar(
         detail_area,
         snapshot,
         config,
+        provisioned
+            .map(|provisions| provisions.agent_rows.as_slice())
+            .unwrap_or(&[]),
         state.agent_scroll,
         hits,
     );
@@ -665,6 +684,7 @@ pub(in crate::client::shell) fn workspace_rows(
     status: crate::api::schema::AgentStatus,
     indented: bool,
     config: &SpacesSidebarConfig,
+    provisioned: &[Vec<crate::config::SpaceSidebarToken>],
 ) -> Vec<Vec<crate::ui::ResolvedToken>> {
     let label = if indented && !workspace.custom_label {
         workspace
@@ -678,6 +698,7 @@ pub(in crate::client::shell) fn workspace_rows(
     let token_values = workspace.tokens.iter().cloned().collect::<HashMap<_, _>>();
     crate::ui::sidebar_space_rows(
         config,
+        provisioned,
         crate::ui::SpaceTokenContext {
             workspace: label,
             branch: workspace.branch.as_deref(),

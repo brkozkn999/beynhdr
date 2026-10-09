@@ -13,6 +13,7 @@ pub mod preview;
 pub mod response;
 pub mod server;
 pub mod session;
+pub mod sidebar;
 pub mod tabs;
 pub mod workspaces;
 pub mod worktrees;
@@ -30,6 +31,7 @@ pub use preview::*;
 pub use response::*;
 pub use server::*;
 pub use session::*;
+pub use sidebar::*;
 pub use tabs::*;
 pub use workspaces::*;
 pub use worktrees::*;
@@ -143,6 +145,10 @@ pub enum Method {
     AgentViewSet(AgentViewSetParams),
     #[serde(rename = "agent.view.clear")]
     AgentViewClear(AgentViewClearParams),
+    #[serde(rename = "sidebar.provision")]
+    SidebarProvision(SidebarProvisionParams),
+    #[serde(rename = "sidebar.provision.clear")]
+    SidebarProvisionClear(SidebarProvisionClearParams),
     #[serde(rename = "agent.focus")]
     AgentFocus(AgentTarget),
     #[serde(rename = "agent.start")]

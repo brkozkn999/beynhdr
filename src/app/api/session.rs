@@ -72,6 +72,7 @@ impl App {
             panes,
             layouts,
             agents: self.collect_agent_infos(),
+            sidebar_provisions: self.state.sidebar_provision_infos(),
         }
     }
 }

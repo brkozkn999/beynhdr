@@ -50,6 +50,8 @@ pub(crate) fn request_changes_ui(request: &Request) -> bool {
             | Method::AgentRename(_)
             | Method::AgentViewSet(_)
             | Method::AgentViewClear(_)
+            | Method::SidebarProvision(_)
+            | Method::SidebarProvisionClear(_)
             | Method::AgentFocus(_)
             | Method::AgentStart(_)
             | Method::AgentPrompt(_)

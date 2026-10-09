@@ -31,6 +31,23 @@ pub const AGENT_VIEW_PROJECTION_CAPABILITY: &str = "agent_view_projection";
 pub const AGENT_VIEW_PROJECTION_KIND: &str = "endpoint.agent-view.v1";
 pub const AGENT_COMPLETIONS_CAPABILITY: &str = "agent_completions";
 pub const AGENT_COMPLETIONS_KIND: &str = "endpoint.agent-completions.v1";
+pub const SIDEBAR_PROVISIONS_CAPABILITY: &str = "sidebar_provisions";
+pub const SIDEBAR_PROVISIONS_KIND: &str = "endpoint.sidebar-provisions.v1";
+
+/// Optional companion to a V1 snapshot carrying the server's session-scoped
+/// sidebar rows. Rows stay opaque (`serde_json::Value`) so clients can skip
+/// token forms their build does not understand.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct EndpointSidebarProvisions {
+    pub boot_id: String,
+    pub revision: u64,
+    /// Rows appended after the configured agent rows.
+    #[serde(default)]
+    pub agent_rows: Vec<serde_json::Value>,
+    /// Rows appended after the configured space rows.
+    #[serde(default)]
+    pub space_rows: Vec<serde_json::Value>,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EndpointAgentCompletions {
@@ -138,6 +155,32 @@ pub fn agent_view_projection_message(
     })
 }
 
+/// Encodes the current provisioned sidebar rows bound to one snapshot
+/// revision. Both row sets empty is an explicit clear.
+pub fn sidebar_provisions_message(
+    boot_id: &str,
+    revision: u64,
+    agent_rows: &[Vec<crate::config::AgentSidebarToken>],
+    space_rows: &[Vec<crate::config::SpaceSidebarToken>],
+) -> serde_json::Result<ServerMessage> {
+    let projection = EndpointSidebarProvisions {
+        boot_id: boot_id.to_owned(),
+        revision,
+        agent_rows: agent_rows
+            .iter()
+            .map(serde_json::to_value)
+            .collect::<serde_json::Result<Vec<_>>>()?,
+        space_rows: space_rows
+            .iter()
+            .map(serde_json::to_value)
+            .collect::<serde_json::Result<Vec<_>>>()?,
+    };
+    Ok(ServerMessage::EndpointControl {
+        kind: SIDEBAR_PROVISIONS_KIND.into(),
+        data: serde_json::to_string(&projection)?,
+    })
+}
+
 impl EndpointClientHello {
     pub fn supports_required_codecs(&self) -> bool {
         self.snapshot_codecs
@@ -174,6 +217,7 @@ impl EndpointServerWelcome {
                 HEALTH_CHECK_CAPABILITY.into(),
                 AGENT_VIEW_PROJECTION_CAPABILITY.into(),
                 AGENT_COMPLETIONS_CAPABILITY.into(),
+                SIDEBAR_PROVISIONS_CAPABILITY.into(),
             ],
             error: None,
         }
@@ -334,6 +378,56 @@ mod tests {
     }
 
     #[test]
+    fn sidebar_provisions_is_an_optional_revision_bound_control() {
+        use crate::config::{AgentSidebarToken, SpaceSidebarToken};
+
+        let agent_rows = vec![
+            vec![AgentSidebarToken::StateIcon, AgentSidebarToken::Agent],
+            vec![AgentSidebarToken::Styled {
+                token: Box::new(AgentSidebarToken::StateText),
+                style: crate::config::SidebarTokenStyle {
+                    fg: None,
+                    bold: Some(true),
+                    dim: None,
+                },
+                rules: Vec::new(),
+            }],
+        ];
+        let space_rows = vec![vec![SpaceSidebarToken::Workspace]];
+        let ServerMessage::EndpointControl { kind, data } =
+            sidebar_provisions_message("boot", 9, &agent_rows, &space_rows).unwrap()
+        else {
+            panic!("provisions should use endpoint control");
+        };
+        assert_eq!(kind, SIDEBAR_PROVISIONS_KIND);
+        let projection: EndpointSidebarProvisions = serde_json::from_str(&data).unwrap();
+        assert_eq!(projection.boot_id, "boot");
+        assert_eq!(projection.revision, 9);
+        let decoded_agents: Vec<Vec<AgentSidebarToken>> = projection
+            .agent_rows
+            .into_iter()
+            .map(|row| serde_json::from_value(row).unwrap())
+            .collect();
+        let decoded_spaces: Vec<Vec<SpaceSidebarToken>> = projection
+            .space_rows
+            .into_iter()
+            .map(|row| serde_json::from_value(row).unwrap())
+            .collect();
+        assert_eq!(decoded_agents, agent_rows);
+        assert_eq!(decoded_spaces, space_rows);
+
+        // An explicit clear encodes two empty row sets.
+        let ServerMessage::EndpointControl { data, .. } =
+            sidebar_provisions_message("boot", 10, &[], &[]).unwrap()
+        else {
+            panic!("provisions should use endpoint control");
+        };
+        let projection: EndpointSidebarProvisions = serde_json::from_str(&data).unwrap();
+        assert!(projection.agent_rows.is_empty());
+        assert!(projection.space_rows.is_empty());
+    }
+
+    #[test]
     fn snapshot_json_tolerates_future_fields_and_command_actions() {
         let mut snapshot = match snapshot_message(&snapshot()).unwrap() {
             ServerMessage::EndpointControl { data, .. } => {
@@ -385,6 +479,7 @@ mod tests {
                 HEALTH_CHECK_CAPABILITY.to_string(),
                 AGENT_VIEW_PROJECTION_CAPABILITY.to_string(),
                 AGENT_COMPLETIONS_CAPABILITY.to_string(),
+                SIDEBAR_PROVISIONS_CAPABILITY.to_string(),
             ]
         );
     }

@@ -39,6 +39,7 @@ pub use self::{
 };
 
 pub(crate) use self::keybinds::parse_key_combo;
+pub(crate) use self::sidebar::{validate_sidebar_rows, MAX_SIDEBAR_TOKENS_PER_ROW};
 pub(crate) use self::write::{update_file_at, write_edit, ConfigEdit};
 pub(crate) use self::{
     io::upsert_top_level_bool,

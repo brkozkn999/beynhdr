@@ -54,6 +54,7 @@ pub(super) fn render_agent_panel(
     area: Rect,
     snapshot: &ClientShellSnapshot,
     config: &ClientShellConfig,
+    provisioned: &[Vec<crate::config::AgentSidebarToken>],
     agent_scroll: &mut usize,
     hits: &mut ShellHitMap,
 ) {
@@ -67,7 +68,7 @@ pub(super) fn render_agent_panel(
         return;
     }
 
-    let rows = agent_rows(snapshot, config, None);
+    let rows = agent_rows(snapshot, config, provisioned, None);
     render_agent_list(
         buffer,
         area,
@@ -237,11 +238,12 @@ pub(super) fn render_agent_list<T>(
 pub(super) fn agent_rows(
     snapshot: &ClientShellSnapshot,
     config: &ClientShellConfig,
+    provisioned: &[Vec<crate::config::AgentSidebarToken>],
     machine: Option<&str>,
 ) -> Vec<AgentRow> {
     ordered_agent_pane_ids(snapshot, config.agent_panel_sort)
         .into_iter()
-        .filter_map(|pane_id| agent_row(snapshot, &pane_id, config, machine))
+        .filter_map(|pane_id| agent_row(snapshot, &pane_id, config, provisioned, machine))
         .collect()
 }
 
@@ -249,6 +251,7 @@ pub(super) fn agent_row(
     snapshot: &ClientShellSnapshot,
     pane_id: &str,
     config: &ClientShellConfig,
+    provisioned: &[Vec<crate::config::AgentSidebarToken>],
     machine: Option<&str>,
 ) -> Option<AgentRow> {
     let agent = snapshot
@@ -294,6 +297,7 @@ pub(super) fn agent_row(
         .and_then(crate::detect::parse_agent_label);
     let rows = crate::ui::sidebar_agent_rows(
         &config.agents,
+        provisioned,
         crate::ui::AgentTokenContext {
             machine,
             workspace: &workspace.label,

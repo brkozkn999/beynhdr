@@ -324,6 +324,9 @@ pub(super) fn render_expanded(
                                 ),
                                 entry.indented,
                                 &config.spaces,
+                                ClientShellState::endpoint_sidebar_provisions(endpoint)
+                                    .map(|provisions| provisions.space_rows.as_slice())
+                                    .unwrap_or(&[]),
                             )
                             .len()
                             .max(1)
@@ -452,6 +455,9 @@ pub(super) fn render_expanded(
                     status,
                     entry.indented,
                     &config.spaces,
+                    ClientShellState::endpoint_sidebar_provisions(endpoint)
+                        .map(|provisions| provisions.space_rows.as_slice())
+                        .unwrap_or(&[]),
                 );
                 let height = (tokens.len().max(1).min(u16::MAX as usize) as u16).min(body.height);
                 if y.saturating_add(height) > body.bottom() {
