@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 pub mod agents;
+pub mod bus;
 pub mod commands;
 pub mod common;
 pub mod events;
@@ -16,6 +17,7 @@ pub mod workspaces;
 pub mod worktrees;
 
 pub use agents::*;
+pub use bus::*;
 pub use commands::*;
 pub use common::*;
 pub use events::*;
@@ -257,6 +259,14 @@ pub enum Method {
     PluginPaneFocus(PluginPaneFocusParams),
     #[serde(rename = "plugin.pane.close")]
     PluginPaneClose(PluginPaneCloseParams),
+    #[serde(rename = "bus.send")]
+    BusSend(BusSendParams),
+    #[serde(rename = "bus.list")]
+    BusList(BusListParams),
+    #[serde(rename = "bus.read")]
+    BusRead(BusReadParams),
+    #[serde(rename = "bus.ack")]
+    BusAck(BusAckParams),
 }
 
 #[cfg(test)]

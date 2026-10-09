@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
+use super::bus::BusMessage;
 use super::common::{AgentStatus, ReadSource};
 use super::panes::{PaneInfo, PaneReadResult, PaneScrollInfo};
 use super::tabs::TabInfo;
@@ -82,6 +83,11 @@ pub enum Subscription {
     PaneScrollChanged { pane_id: String },
     #[serde(rename = "layout.updated")]
     LayoutUpdated {},
+    /// Fires when a `bus.send` request was accepted into a mailbox.
+    /// Carries the full queued message so subscribers can react without a
+    /// follow-up `bus.list`.
+    #[serde(rename = "bus.message")]
+    BusMessage {},
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
@@ -218,6 +224,7 @@ pub enum EventKind {
     PaneAgentDetected,
     PaneAgentStatusChanged,
     LayoutUpdated,
+    BusMessage,
 }
 
 impl EventKind {
@@ -249,6 +256,7 @@ impl EventKind {
             EventKind::PaneAgentDetected => "pane.agent_detected",
             EventKind::PaneAgentStatusChanged => "pane.agent_status_changed",
             EventKind::LayoutUpdated => "layout.updated",
+            EventKind::BusMessage => "bus.message",
         }
     }
 }
@@ -281,6 +289,7 @@ pub const KNOWN_EVENT_KINDS: &[EventKind] = &[
     EventKind::PaneAgentDetected,
     EventKind::PaneAgentStatusChanged,
     EventKind::LayoutUpdated,
+    EventKind::BusMessage,
 ];
 
 pub const PLUGIN_HOOK_EVENT_KINDS: &[EventKind] = &[
@@ -306,6 +315,9 @@ pub const PLUGIN_HOOK_EVENT_KINDS: &[EventKind] = &[
     EventKind::PaneExited,
     EventKind::PaneAgentDetected,
     EventKind::PaneAgentStatusChanged,
+    // Bus messages are discrete, bounded (64/mailbox) signals between agents
+    // and plugins, so they are hookable unlike output-volume events.
+    EventKind::BusMessage,
 ];
 
 #[cfg(test)]
@@ -552,5 +564,12 @@ pub enum EventData {
     },
     LayoutUpdated {
         layout: super::panes::PaneLayoutSnapshot,
+    },
+    /// A `bus.send` request was accepted into the recipient mailbox.
+    BusMessage {
+        /// The stored message; identical to the `bus.send` response payload.
+        message: BusMessage,
+        /// Recipient mailbox depth after the enqueue.
+        pending: u32,
     },
 }

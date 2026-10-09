@@ -1459,3 +1459,95 @@ fn pane_link_resolve_round_trips() {
         result
     );
 }
+
+#[test]
+fn bus_requests_and_results_round_trip() {
+    let request = Request {
+        id: "bus-send".into(),
+        method: Method::BusSend(BusSendParams {
+            to: "worker-1".into(),
+            text: "hello".into(),
+            from: Some("dispatcher".into()),
+        }),
+    };
+    let json = serde_json::to_value(&request).unwrap();
+    assert_eq!(json["method"], "bus.send");
+    assert_eq!(json["params"]["to"], "worker-1");
+    assert_eq!(serde_json::from_value::<Request>(json).unwrap(), request);
+
+    let message = BusMessage {
+        id: 7,
+        to: "w1:p1".into(),
+        workspace_id: "w1".into(),
+        from: Some("dispatcher".into()),
+        text: "hello".into(),
+        queued_unix_ms: 1_700_000_000_000,
+    };
+    let result = ResponseResult::BusSend {
+        message: message.clone(),
+        pending: 3,
+    };
+    let json = serde_json::to_value(&result).unwrap();
+    assert_eq!(json["type"], "bus_send");
+    assert_eq!(json["message"]["id"], 7);
+    assert_eq!(json["pending"], 3);
+    assert_eq!(
+        serde_json::from_value::<ResponseResult>(json).unwrap(),
+        result
+    );
+
+    // `from` is omitted on the wire when absent.
+    let bare = ResponseResult::BusList {
+        messages: vec![BusMessage {
+            from: None,
+            ..message.clone()
+        }],
+    };
+    let json = serde_json::to_value(&bare).unwrap();
+    assert_eq!(json["type"], "bus_list");
+    assert!(json["messages"][0].get("from").is_none());
+    assert_eq!(
+        serde_json::from_value::<ResponseResult>(json).unwrap(),
+        bare
+    );
+
+    let ack = ResponseResult::BusAck {
+        message_id: 7,
+        removed: true,
+    };
+    let json = serde_json::to_value(&ack).unwrap();
+    assert_eq!(json["type"], "bus_ack");
+    assert_eq!(json["removed"], true);
+    assert_eq!(serde_json::from_value::<ResponseResult>(json).unwrap(), ack);
+}
+
+#[test]
+fn bus_message_event_round_trips() {
+    let envelope = EventEnvelope {
+        event: EventKind::BusMessage,
+        data: EventData::BusMessage {
+            message: BusMessage {
+                id: 1,
+                to: "w1:p2".into(),
+                workspace_id: "w1".into(),
+                from: None,
+                text: "ping".into(),
+                queued_unix_ms: 42,
+            },
+            pending: 1,
+        },
+    };
+    let json = serde_json::to_value(&envelope).unwrap();
+    assert_eq!(json["event"], "bus_message");
+    assert_eq!(json["data"]["type"], "bus_message");
+    assert_eq!(json["data"]["message"]["to"], "w1:p2");
+    assert_eq!(
+        serde_json::from_value::<EventEnvelope>(json).unwrap(),
+        envelope
+    );
+
+    let subscription: Subscription =
+        serde_json::from_value(serde_json::json!({ "type": "bus.message" })).unwrap();
+    assert!(matches!(subscription, Subscription::BusMessage {}));
+    assert_eq!(EventKind::BusMessage.dot_name(), "bus.message");
+}

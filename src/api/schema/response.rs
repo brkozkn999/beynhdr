@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use super::agents::AgentInfo;
+use super::bus::BusMessage;
 use super::common::{ClientWindowTitleReason, NotificationShowReason};
 use super::events::EventEnvelope;
 use super::integrations::{
@@ -293,6 +294,25 @@ pub enum ResponseResult {
     ClientShellSurfaceSet {
         active: bool,
         projection_revision: u64,
+    },
+    /// `bus.send` result: the accepted message and the recipient's queue depth.
+    BusSend {
+        message: BusMessage,
+        /// Pending messages in the recipient mailbox after this enqueue.
+        pending: u32,
+    },
+    /// `bus.list` result: pending messages without consuming them.
+    BusList {
+        messages: Vec<BusMessage>,
+    },
+    /// `bus.read` result: messages drained from the mailbox, FIFO order.
+    BusRead {
+        messages: Vec<BusMessage>,
+    },
+    /// `bus.ack` result: whether a pending message with that id was removed.
+    BusAck {
+        message_id: u64,
+        removed: bool,
     },
     Ok {},
 }
