@@ -176,6 +176,15 @@ impl App {
                 pane_id,
                 workspace_id,
                 ..
+            }
+            | EventData::BusMessage {
+                message:
+                    crate::api::schema::BusMessage {
+                        to: pane_id,
+                        workspace_id,
+                        ..
+                    },
+                ..
             } => self
                 .plugin_context_for_public_pane_id(pane_id, correlation_id)
                 .or_else(|| self.plugin_context_for_workspace_id(workspace_id, correlation_id))

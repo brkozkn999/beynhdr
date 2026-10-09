@@ -79,6 +79,50 @@
           ],
           "type": "string"
         },
+        "BusMessage": {
+          "description": "A queued bus message. The same record is returned by `bus.send`,\n`bus.list`, `bus.read`, and carried in `bus.message` events.",
+          "properties": {
+            "from": {
+              "description": "Sender label supplied by `bus.send`, when provided.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "id": {
+              "description": "Per-mailbox monotonically increasing id.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "queued_unix_ms": {
+              "description": "Unix timestamp in milliseconds when the message was queued.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "text": {
+              "description": "Message body (UTF-8).",
+              "type": "string"
+            },
+            "to": {
+              "description": "Public pane id that owned the mailbox when the message was accepted.",
+              "type": "string"
+            },
+            "workspace_id": {
+              "description": "Workspace that contained the recipient pane at send time.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "to",
+            "workspace_id",
+            "text",
+            "queued_unix_ms"
+          ],
+          "type": "object"
+        },
         "EventData": {
           "oneOf": [
             {
@@ -723,6 +767,31 @@
                 "layout"
               ],
               "type": "object"
+            },
+            {
+              "description": "A `bus.send` request was accepted into the recipient mailbox.",
+              "properties": {
+                "message": {
+                  "$ref": "#/schemas/event/$defs/BusMessage",
+                  "description": "The stored message; identical to the `bus.send` response payload."
+                },
+                "pending": {
+                  "description": "Recipient mailbox depth after the enqueue.",
+                  "format": "uint32",
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": {
+                  "const": "bus_message",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "message",
+                "pending"
+              ],
+              "type": "object"
             }
           ]
         },
@@ -753,7 +822,8 @@
             "pane_exited",
             "pane_agent_detected",
             "pane_agent_status_changed",
-            "layout_updated"
+            "layout_updated",
+            "bus_message"
           ],
           "type": "string"
         },
@@ -1692,6 +1762,86 @@
           },
           "required": [
             "target"
+          ],
+          "type": "object"
+        },
+        "BusAckParams": {
+          "description": "`bus.ack` parameters: remove a single pending message by id.",
+          "properties": {
+            "message_id": {
+              "description": "Message id as returned by `bus.send`, `bus.list`, or `bus.message`.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "to": {
+              "description": "Mailbox owner: an agent name or a public pane id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "to",
+            "message_id"
+          ],
+          "type": "object"
+        },
+        "BusListParams": {
+          "description": "`bus.list` parameters: peek at pending messages without consuming them.",
+          "properties": {
+            "to": {
+              "description": "Mailbox owner: an agent name or a public pane id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "to"
+          ],
+          "type": "object"
+        },
+        "BusReadParams": {
+          "description": "`bus.read` parameters: drain pending messages from a mailbox.",
+          "properties": {
+            "max": {
+              "description": "Maximum number of pending messages to drain. Absent drains all pending.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "to": {
+              "description": "Mailbox owner: an agent name or a public pane id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "to"
+          ],
+          "type": "object"
+        },
+        "BusSendParams": {
+          "description": "`bus.send` parameters: queue a message for an agent or pane mailbox.",
+          "properties": {
+            "from": {
+              "description": "Optional free-form sender label (agent name, pane id, or plugin id).",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "text": {
+              "description": "Message body. UTF-8, non-empty, at most 8 KiB.",
+              "type": "string"
+            },
+            "to": {
+              "description": "Recipient mailbox owner: an agent name or a public pane id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "to",
+            "text"
           ],
           "type": "object"
         },
@@ -4267,6 +4417,19 @@
                 "type"
               ],
               "type": "object"
+            },
+            {
+              "description": "Fires when a `bus.send` request was accepted into a mailbox.\nCarries the full queued message so subscribers can react without a\nfollow-up `bus.list`.",
+              "properties": {
+                "type": {
+                  "const": "bus.message",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type"
+              ],
+              "type": "object"
             }
           ]
         },
@@ -6312,6 +6475,70 @@
             "params"
           ],
           "type": "object"
+        },
+        {
+          "properties": {
+            "method": {
+              "const": "bus.send",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/schemas/request/$defs/BusSendParams"
+            }
+          },
+          "required": [
+            "method",
+            "params"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "method": {
+              "const": "bus.list",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/schemas/request/$defs/BusListParams"
+            }
+          },
+          "required": [
+            "method",
+            "params"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "method": {
+              "const": "bus.read",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/schemas/request/$defs/BusReadParams"
+            }
+          },
+          "required": [
+            "method",
+            "params"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "method": {
+              "const": "bus.ack",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/schemas/request/$defs/BusAckParams"
+            }
+          },
+          "required": [
+            "method",
+            "params"
+          ],
+          "type": "object"
         }
       ],
       "properties": {
@@ -6775,6 +7002,50 @@
             "unknown"
           ],
           "type": "string"
+        },
+        "BusMessage": {
+          "description": "A queued bus message. The same record is returned by `bus.send`,\n`bus.list`, `bus.read`, and carried in `bus.message` events.",
+          "properties": {
+            "from": {
+              "description": "Sender label supplied by `bus.send`, when provided.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "id": {
+              "description": "Per-mailbox monotonically increasing id.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "queued_unix_ms": {
+              "description": "Unix timestamp in milliseconds when the message was queued.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "text": {
+              "description": "Message body (UTF-8).",
+              "type": "string"
+            },
+            "to": {
+              "description": "Public pane id that owned the mailbox when the message was accepted.",
+              "type": "string"
+            },
+            "workspace_id": {
+              "description": "Workspace that contained the recipient pane at send time.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "to",
+            "workspace_id",
+            "text",
+            "queued_unix_ms"
+          ],
+          "type": "object"
         },
         "ClientWindowTitleReason": {
           "enum": [
@@ -7436,6 +7707,31 @@
                 "layout"
               ],
               "type": "object"
+            },
+            {
+              "description": "A `bus.send` request was accepted into the recipient mailbox.",
+              "properties": {
+                "message": {
+                  "$ref": "#/schemas/success_response/$defs/BusMessage",
+                  "description": "The stored message; identical to the `bus.send` response payload."
+                },
+                "pending": {
+                  "description": "Recipient mailbox depth after the enqueue.",
+                  "format": "uint32",
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": {
+                  "const": "bus_message",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "message",
+                "pending"
+              ],
+              "type": "object"
             }
           ]
         },
@@ -7481,7 +7777,8 @@
             "pane_exited",
             "pane_agent_detected",
             "pane_agent_status_changed",
-            "layout_updated"
+            "layout_updated",
+            "bus_message"
           ],
           "type": "string"
         },
@@ -10401,6 +10698,93 @@
                 "type",
                 "active",
                 "projection_revision"
+              ],
+              "type": "object"
+            },
+            {
+              "description": "`bus.send` result: the accepted message and the recipient's queue depth.",
+              "properties": {
+                "message": {
+                  "$ref": "#/schemas/success_response/$defs/BusMessage"
+                },
+                "pending": {
+                  "description": "Pending messages in the recipient mailbox after this enqueue.",
+                  "format": "uint32",
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": {
+                  "const": "bus_send",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "message",
+                "pending"
+              ],
+              "type": "object"
+            },
+            {
+              "description": "`bus.list` result: pending messages without consuming them.",
+              "properties": {
+                "messages": {
+                  "items": {
+                    "$ref": "#/schemas/success_response/$defs/BusMessage"
+                  },
+                  "type": "array"
+                },
+                "type": {
+                  "const": "bus_list",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "messages"
+              ],
+              "type": "object"
+            },
+            {
+              "description": "`bus.read` result: messages drained from the mailbox, FIFO order.",
+              "properties": {
+                "messages": {
+                  "items": {
+                    "$ref": "#/schemas/success_response/$defs/BusMessage"
+                  },
+                  "type": "array"
+                },
+                "type": {
+                  "const": "bus_read",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "messages"
+              ],
+              "type": "object"
+            },
+            {
+              "description": "`bus.ack` result: whether a pending message with that id was removed.",
+              "properties": {
+                "message_id": {
+                  "format": "uint64",
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "removed": {
+                  "type": "boolean"
+                },
+                "type": {
+                  "const": "bus_ack",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "message_id",
+                "removed"
               ],
               "type": "object"
             },

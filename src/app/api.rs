@@ -2,6 +2,7 @@ use std::time::{Duration, Instant};
 
 mod agent_view;
 mod agents;
+mod bus;
 mod env;
 mod integrations;
 mod layouts;
@@ -1256,6 +1257,10 @@ impl App {
             Method::PluginPaneClose(params) => {
                 return self.handle_plugin_pane_close(request.id, params);
             }
+            Method::BusSend(params) => return self.handle_bus_send(request.id, params),
+            Method::BusList(params) => return self.handle_bus_list(request.id, params),
+            Method::BusRead(params) => return self.handle_bus_read(request.id, params),
+            Method::BusAck(params) => return self.handle_bus_ack(request.id, params),
             _ => {
                 return responses::encode_error(
                     request.id,

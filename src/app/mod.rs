@@ -15,6 +15,7 @@ mod api;
 pub(crate) use api::test_support::exiting_test_command;
 mod api_helpers;
 pub(crate) use api_helpers::limit_snapshot_lines;
+mod bus;
 mod creation;
 mod custom_commands;
 mod git_refresh;
@@ -110,6 +111,9 @@ pub struct App {
     pub(crate) event_rx: mpsc::Receiver<AppEvent>,
     pub(crate) api_rx: tokio::sync::mpsc::UnboundedReceiver<crate::api::ApiRequestMessage>,
     pub(crate) event_hub: crate::api::EventHub,
+    /// Transient per-recipient `bus.*` mailboxes; never persisted into the
+    /// session snapshot.
+    pub(crate) bus: bus::AgentBus,
     pub(crate) last_focus: Option<(usize, crate::layout::PaneId)>,
     pub(crate) policy: AppPolicy,
     pub(crate) config_diagnostic_deadline: Option<Instant>,
@@ -670,6 +674,7 @@ impl App {
             last_presentation_at: None,
             api_rx,
             event_hub,
+            bus: bus::AgentBus::default(),
             last_focus,
             policy,
             render_notify,
