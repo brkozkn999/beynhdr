@@ -3893,6 +3893,72 @@
           ],
           "type": "object"
         },
+        "SidebarPanel": {
+          "description": "Sidebar panel that receives provisioned rows.",
+          "oneOf": [
+            {
+              "const": "agents",
+              "description": "Rows appended to the agent panel after the configured agent rows.",
+              "type": "string"
+            },
+            {
+              "const": "spaces",
+              "description": "Rows appended to the workspace panel after the configured space rows.",
+              "type": "string"
+            }
+          ]
+        },
+        "SidebarProvisionClearParams": {
+          "description": "Removes the sidebar rows owned by one source.",
+          "properties": {
+            "panel": {
+              "anyOf": [
+                {
+                  "$ref": "#/schemas/request/$defs/SidebarPanel"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "When omitted, clears the source's rows from both panels."
+            },
+            "source": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "source"
+          ],
+          "type": "object"
+        },
+        "SidebarProvisionParams": {
+          "description": "Registers or replaces the sidebar rows owned by one source for one panel.\nThe rows live only in server memory and are cleared on restart, on\n`sidebar.provision.clear`, and when an owning `plugin:` source is unlinked\nor disabled.",
+          "properties": {
+            "panel": {
+              "$ref": "#/schemas/request/$defs/SidebarPanel"
+            },
+            "rows": {
+              "description": "Rows appended after the configured rows for the panel. An empty array\nclears this source's rows for the panel.",
+              "items": {
+                "items": true,
+                "maxItems": 16,
+                "type": "array"
+              },
+              "maxItems": 16,
+              "type": "array"
+            },
+            "source": {
+              "description": "Owner identity such as `plugin:example.status`. Sources prefixed with\n`plugin:` require the plugin to be installed and enabled.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "source",
+            "panel",
+            "rows"
+          ],
+          "type": "object"
+        },
         "SplitDirection": {
           "enum": [
             "right",
@@ -5361,6 +5427,38 @@
             },
             "params": {
               "$ref": "#/schemas/request/$defs/AgentViewClearParams"
+            }
+          },
+          "required": [
+            "method",
+            "params"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "method": {
+              "const": "sidebar.provision",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/schemas/request/$defs/SidebarProvisionParams"
+            }
+          },
+          "required": [
+            "method",
+            "params"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "method": {
+              "const": "sidebar.provision.clear",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/schemas/request/$defs/SidebarProvisionClearParams"
             }
           },
           "required": [
@@ -9540,6 +9638,30 @@
               "type": "object"
             },
             {
+              "description": "Registered sidebar rows that remain owned by the source after a\n`sidebar.provision` or `sidebar.provision.clear` call.",
+              "properties": {
+                "provisions": {
+                  "items": {
+                    "$ref": "#/schemas/success_response/$defs/SidebarProvisionInfo"
+                  },
+                  "type": "array"
+                },
+                "source": {
+                  "type": "string"
+                },
+                "type": {
+                  "const": "sidebar_provisions",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "source",
+                "provisions"
+              ],
+              "type": "object"
+            },
+            {
               "properties": {
                 "pane": {
                   "$ref": "#/schemas/success_response/$defs/PaneInfo"
@@ -10500,6 +10622,13 @@
               "minimum": 0,
               "type": "integer"
             },
+            "sidebar_provisions": {
+              "description": "Session-scoped sidebar rows registered through `sidebar.provision`.",
+              "items": {
+                "$ref": "#/schemas/success_response/$defs/SidebarProvisionInfo"
+              },
+              "type": "array"
+            },
             "tabs": {
               "items": {
                 "$ref": "#/schemas/success_response/$defs/TabInfo"
@@ -10524,6 +10653,48 @@
             "panes",
             "layouts",
             "agents"
+          ],
+          "type": "object"
+        },
+        "SidebarPanel": {
+          "description": "Sidebar panel that receives provisioned rows.",
+          "oneOf": [
+            {
+              "const": "agents",
+              "description": "Rows appended to the agent panel after the configured agent rows.",
+              "type": "string"
+            },
+            {
+              "const": "spaces",
+              "description": "Rows appended to the workspace panel after the configured space rows.",
+              "type": "string"
+            }
+          ]
+        },
+        "SidebarProvisionInfo": {
+          "description": "One source's registered row set for one panel.",
+          "properties": {
+            "panel": {
+              "$ref": "#/schemas/success_response/$defs/SidebarPanel"
+            },
+            "rows": {
+              "description": "Sidebar rows in the `[ui.sidebar.*]` config token format: each row is an array of tokens; a token is a builtin name (\"state_icon\", \"workspace\", ...), a custom \"$name\", or a styled object `{ token, fg, bold, dim, rules }`.",
+              "items": {
+                "items": true,
+                "maxItems": 16,
+                "type": "array"
+              },
+              "maxItems": 16,
+              "type": "array"
+            },
+            "source": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "source",
+            "panel",
+            "rows"
           ],
           "type": "object"
         },

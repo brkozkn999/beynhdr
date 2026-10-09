@@ -8,6 +8,17 @@ pub(crate) struct ClientEndpointAgentViewProjection {
     pub(crate) view: Result<Option<crate::api::schema::AgentViewSetParams>, ()>,
 }
 
+/// Session-scoped sidebar rows pushed by one endpoint's server, bound to the
+/// snapshot revision they were encoded with.
+#[derive(Clone, Debug)]
+pub(crate) struct ClientEndpointSidebarProvisions {
+    generation: Option<u64>,
+    boot_id: String,
+    revision: u64,
+    pub(crate) agent_rows: Vec<Vec<crate::config::AgentSidebarToken>>,
+    pub(crate) space_rows: Vec<Vec<crate::config::SpaceSidebarToken>>,
+}
+
 #[derive(Clone, Debug)]
 pub(crate) struct ClientShellEndpoint {
     pub(crate) endpoint_id: ClientEndpointId,
@@ -21,6 +32,8 @@ pub(crate) struct ClientShellEndpoint {
     pub(crate) agent_view_projection: Option<ClientEndpointAgentViewProjection>,
     pending_agent_view_projection: Option<ClientEndpointAgentViewProjection>,
     pub(crate) agent_view_projection_supported: bool,
+    sidebar_provisions: Option<ClientEndpointSidebarProvisions>,
+    pending_sidebar_provisions: Option<ClientEndpointSidebarProvisions>,
     pub(crate) methods: Option<HashSet<String>>,
 }
 
@@ -87,6 +100,10 @@ impl ClientShellState {
                     .and_then(|endpoint| endpoint.pending_agent_view_projection.clone()),
                 agent_view_projection_supported: previous
                     .is_some_and(|endpoint| endpoint.agent_view_projection_supported),
+                sidebar_provisions: previous
+                    .and_then(|endpoint| endpoint.sidebar_provisions.clone()),
+                pending_sidebar_provisions: previous
+                    .and_then(|endpoint| endpoint.pending_sidebar_provisions.clone()),
                 methods: previous.and_then(|endpoint| endpoint.methods.clone()),
             });
         }
@@ -133,6 +150,8 @@ impl ClientShellState {
             endpoint.agent_view_projection = None;
             endpoint.pending_agent_view_projection = None;
             endpoint.agent_view_projection_supported = false;
+            endpoint.sidebar_provisions = None;
+            endpoint.pending_sidebar_provisions = None;
         }
     }
 
@@ -453,6 +472,115 @@ impl ClientShellState {
             .then_some(&projection.view)
     }
 
+    pub(crate) fn set_endpoint_sidebar_provisions_for_generation(
+        &mut self,
+        endpoint_id: &ClientEndpointId,
+        generation: u64,
+        projection: crate::client::endpoint::DecodedSidebarProvisions,
+    ) {
+        self.set_endpoint_sidebar_provisions(
+            endpoint_id,
+            Some(generation),
+            projection.boot_id,
+            projection.revision,
+            projection.agent_rows,
+            projection.space_rows,
+        );
+    }
+
+    #[cfg(test)]
+    pub(crate) fn set_test_endpoint_sidebar_provisions(
+        &mut self,
+        endpoint_id: &ClientEndpointId,
+        agent_rows: Vec<Vec<crate::config::AgentSidebarToken>>,
+        space_rows: Vec<Vec<crate::config::SpaceSidebarToken>>,
+    ) {
+        let Some((boot_id, revision)) = self
+            .endpoints
+            .iter()
+            .find(|endpoint| &endpoint.endpoint_id == endpoint_id)
+            .and_then(|endpoint| {
+                endpoint
+                    .snapshot
+                    .as_deref()
+                    .map(|snapshot| (snapshot.boot_id.clone(), snapshot.revision))
+            })
+        else {
+            return;
+        };
+        self.set_endpoint_sidebar_provisions(
+            endpoint_id,
+            None,
+            boot_id,
+            revision,
+            agent_rows,
+            space_rows,
+        );
+    }
+
+    fn set_endpoint_sidebar_provisions(
+        &mut self,
+        endpoint_id: &ClientEndpointId,
+        generation: Option<u64>,
+        boot_id: String,
+        revision: u64,
+        agent_rows: Vec<Vec<crate::config::AgentSidebarToken>>,
+        space_rows: Vec<Vec<crate::config::SpaceSidebarToken>>,
+    ) {
+        let Some(endpoint) = self
+            .endpoints
+            .iter_mut()
+            .find(|endpoint| &endpoint.endpoint_id == endpoint_id)
+        else {
+            return;
+        };
+        if endpoint.snapshot_generation == generation
+            && endpoint
+                .snapshot
+                .as_deref()
+                .is_some_and(|snapshot| snapshot.boot_id == boot_id && snapshot.revision > revision)
+        {
+            return;
+        }
+        let next = ClientEndpointSidebarProvisions {
+            generation,
+            boot_id,
+            revision,
+            agent_rows,
+            space_rows,
+        };
+        let matches_snapshot = endpoint.snapshot_generation == next.generation
+            && endpoint.snapshot.as_deref().is_some_and(|snapshot| {
+                snapshot.boot_id == next.boot_id && snapshot.revision == next.revision
+            });
+        let slot = if matches_snapshot {
+            &mut endpoint.sidebar_provisions
+        } else {
+            &mut endpoint.pending_sidebar_provisions
+        };
+        if slot.as_ref().is_some_and(|current| {
+            current.generation == next.generation
+                && current.boot_id == next.boot_id
+                && current.revision >= next.revision
+        }) {
+            return;
+        }
+        *slot = Some(next);
+    }
+
+    /// Provisioned sidebar rows for one endpoint when the recorded projection
+    /// still matches the endpoint's current snapshot.
+    pub(crate) fn endpoint_sidebar_provisions(
+        endpoint: &ClientShellEndpoint,
+    ) -> Option<&ClientEndpointSidebarProvisions> {
+        let snapshot = endpoint.snapshot.as_deref()?;
+        let provisions = endpoint.sidebar_provisions.as_ref()?;
+        (provisions.generation == endpoint.snapshot_generation
+            && provisions.boot_id == snapshot.boot_id
+            && provisions.revision == snapshot.revision)
+            .then_some(provisions)
+    }
+
     /// A terminal normally starts focused. `None` means this host cannot report focus events,
     /// not that the endpoint has no viewer; activation therefore sends an explicit true baseline.
     pub(crate) fn host_focus_baseline(&self) -> bool {
@@ -651,6 +779,35 @@ impl ClientShellState {
                 endpoint.agent_view_projection = None;
             }
         }
+        let pending_provisions_match =
+            endpoint
+                .pending_sidebar_provisions
+                .as_ref()
+                .is_some_and(|provisions| {
+                    provisions.generation == generation
+                        && endpoint.snapshot.as_deref().is_some_and(|snapshot| {
+                            provisions.boot_id == snapshot.boot_id
+                                && provisions.revision == snapshot.revision
+                        })
+                });
+        if pending_provisions_match {
+            endpoint.sidebar_provisions = endpoint.pending_sidebar_provisions.take();
+        } else {
+            endpoint.pending_sidebar_provisions = None;
+            if endpoint
+                .sidebar_provisions
+                .as_ref()
+                .is_some_and(|provisions| {
+                    provisions.generation != generation
+                        || endpoint.snapshot.as_deref().is_some_and(|snapshot| {
+                            provisions.boot_id != snapshot.boot_id
+                                || provisions.revision != snapshot.revision
+                        })
+                })
+            {
+                endpoint.sidebar_provisions = None;
+            }
+        }
     }
 
     pub(crate) fn acknowledge_active_surface_agents(&mut self, surface: &PaneSurfaceFrame) -> bool {
@@ -741,6 +898,8 @@ pub(super) fn local_endpoint() -> ClientShellEndpoint {
         agent_view_projection: None,
         pending_agent_view_projection: None,
         agent_view_projection_supported: false,
+        sidebar_provisions: None,
+        pending_sidebar_provisions: None,
         methods: None,
     }
 }

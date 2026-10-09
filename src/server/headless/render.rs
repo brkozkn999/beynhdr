@@ -597,6 +597,7 @@ impl HeadlessServer {
                     .get(&client_id)
                     .and_then(|client| client.shell_location.clone());
                 let agent_view = self.app.state.agent_view_override.clone();
+                let sidebar_provisions = self.app.state.merged_sidebar_provisions();
                 let Some(client) = self.clients.get_mut(&client_id) else {
                     continue;
                 };
@@ -616,6 +617,7 @@ impl HeadlessServer {
                 if client.shell_snapshot.as_ref() != Some(&candidate)
                     || client.shell_agent_completions.as_ref() != Some(&completions)
                     || client.shell_agent_view != agent_view
+                    || client.shell_sidebar_provisions != sidebar_provisions
                 {
                     client.shell_projection_revision =
                         client.shell_projection_revision.saturating_add(1);
@@ -652,6 +654,31 @@ impl HeadlessServer {
                     } else {
                         None
                     };
+                    let sidebar_provisions_message = if sidebar_provisions.is_some()
+                        || client.shell_sidebar_provisions.is_some()
+                    {
+                        let (agent_rows, space_rows) = sidebar_provisions
+                            .as_ref()
+                            .map(|provisions| {
+                                (provisions.agents.as_slice(), provisions.spaces.as_slice())
+                            })
+                            .unwrap_or((&[], &[]));
+                        match crate::protocol::endpoint::sidebar_provisions_message(
+                            &candidate.boot_id,
+                            candidate.revision,
+                            agent_rows,
+                            space_rows,
+                        ) {
+                            Ok(message) => Some(message),
+                            Err(err) => {
+                                warn!(client_id, err = %err, "failed to encode sidebar provisions");
+                                broken_clients.push(client_id);
+                                continue;
+                            }
+                        }
+                    } else {
+                        None
+                    };
                     let snapshot_message =
                         match crate::protocol::endpoint::snapshot_message(&candidate) {
                             Ok(message) => message,
@@ -673,6 +700,18 @@ impl HeadlessServer {
                             continue;
                         }
                     };
+                    let sidebar_provisions_framed = match sidebar_provisions_message
+                        .as_ref()
+                        .map(Self::frame_server_message)
+                        .transpose()
+                    {
+                        Ok(framed) => framed,
+                        Err(err) => {
+                            warn!(client_id, err = %err, "failed to frame sidebar provisions");
+                            broken_clients.push(client_id);
+                            continue;
+                        }
+                    };
                     let snapshot_framed = match Self::frame_server_message(&snapshot_message) {
                         Ok(framed) => framed,
                         Err(err) => {
@@ -686,6 +725,8 @@ impl HeadlessServer {
                         continue;
                     };
                     if projection_framed.is_some_and(|framed| writer.control.send(framed).is_err())
+                        || sidebar_provisions_framed
+                            .is_some_and(|framed| writer.control.send(framed).is_err())
                         || writer.control.send(completion_framed).is_err()
                         || writer.control.send(snapshot_framed).is_err()
                     {
@@ -695,6 +736,7 @@ impl HeadlessServer {
                     client.shell_snapshot = Some(candidate);
                     client.shell_agent_completions = Some(completions);
                     client.shell_agent_view = agent_view;
+                    client.shell_sidebar_provisions = sidebar_provisions;
                 }
                 shell_projection_revision = client.shell_projection_revision;
                 if !client.shell_surface_active {

@@ -9,6 +9,7 @@ mod panes;
 pub(crate) mod plugins;
 pub(super) mod responses;
 mod session;
+mod sidebar;
 mod tabs;
 mod workspaces;
 mod worktrees;
@@ -1119,6 +1120,12 @@ impl App {
             Method::AgentViewSet(params) => return self.handle_agent_view_set(request.id, params),
             Method::AgentViewClear(params) => {
                 return self.handle_agent_view_clear(request.id, params);
+            }
+            Method::SidebarProvision(params) => {
+                return self.handle_sidebar_provision(request.id, params);
+            }
+            Method::SidebarProvisionClear(params) => {
+                return self.handle_sidebar_provision_clear(request.id, params);
             }
             Method::AgentStart(params) => return self.handle_agent_start(request.id, params),
             Method::AgentPrompt(_) => {

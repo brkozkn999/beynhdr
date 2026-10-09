@@ -8,8 +8,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::detect::Agent;
 
-const MAX_SIDEBAR_ROWS: usize = 16;
-const MAX_SIDEBAR_TOKENS_PER_ROW: usize = 16;
+pub(crate) const MAX_SIDEBAR_ROWS: usize = 16;
+pub(crate) const MAX_SIDEBAR_TOKENS_PER_ROW: usize = 16;
 const DEFAULT_SIDEBAR_ROW_GAP: u16 = 0;
 
 fn deserialize_sidebar_rows<'de, D, T>(deserializer: D) -> Result<Vec<Vec<T>>, D::Error>
@@ -22,7 +22,7 @@ where
     Ok(rows)
 }
 
-fn validate_sidebar_rows<T>(rows: &[Vec<T>]) -> Result<(), String> {
+pub(crate) fn validate_sidebar_rows<T>(rows: &[Vec<T>]) -> Result<(), String> {
     if rows.len() > MAX_SIDEBAR_ROWS {
         return Err(format!(
             "sidebar layouts may contain at most {MAX_SIDEBAR_ROWS} rows"

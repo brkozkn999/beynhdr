@@ -17,6 +17,7 @@ use super::plugins::{
 };
 use super::server::ServerCapabilities;
 use super::session::SessionSnapshot;
+use super::sidebar::SidebarProvisionInfo;
 use super::tabs::TabInfo;
 use super::workspaces::WorkspaceInfo;
 use super::worktrees::{WorktreeInfo, WorktreeSourceInfo};
@@ -113,6 +114,12 @@ pub enum ResponseResult {
         source: Option<String>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         label: Option<String>,
+    },
+    /// Registered sidebar rows that remain owned by the source after a
+    /// `sidebar.provision` or `sidebar.provision.clear` call.
+    SidebarProvisions {
+        source: String,
+        provisions: Vec<SidebarProvisionInfo>,
     },
     PaneInfo {
         pane: PaneInfo,

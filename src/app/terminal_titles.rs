@@ -15,6 +15,7 @@ impl App {
         std::iter::once(&config.rows)
             .chain(config.rows_by_agent.values())
             .flatten()
+            .chain(self.state.provisioned_agent_rows())
             .flatten()
             .any(|token| match token.parts().0 {
                 crate::config::AgentSidebarToken::TerminalTitle => changes.raw_changed,

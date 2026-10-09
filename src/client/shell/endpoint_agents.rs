@@ -146,6 +146,9 @@ fn agent_rows(
                             snapshot,
                             &agent.pane_id,
                             config,
+                            ClientShellState::endpoint_sidebar_provisions(endpoint)
+                                .map(|provisions| provisions.agent_rows.as_slice())
+                                .unwrap_or(&[]),
                             Some(&endpoint.label),
                         )
                     })
