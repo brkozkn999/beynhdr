@@ -41,13 +41,18 @@ impl App {
         if self.state.workspaces.is_empty() {
             SessionSaveJob::Clear
         } else {
-            let snapshot = crate::persist::capture(
+            let mut snapshot = crate::persist::capture(
                 &self.state.workspaces,
                 &self.state.terminals,
                 &self.terminal_runtimes,
                 self.state.active,
                 self.state.selected,
             );
+            snapshot.lanes = self
+                .lanes
+                .values()
+                .map(crate::app::api::lanes::LaneRecord::to_snapshot)
+                .collect();
             let history = self.persist_pane_history.then(|| {
                 crate::persist::capture_history(
                     &snapshot,

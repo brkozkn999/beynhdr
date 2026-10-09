@@ -194,6 +194,26 @@ impl App {
                     context.focused_pane_id = Some(pane_id.clone());
                     context
                 }),
+            EventData::LaneCreated { lane } => lane
+                .workspace
+                .as_ref()
+                .map(|workspace| self.plugin_context_for_workspace_info(workspace, correlation_id))
+                .unwrap_or_else(|| {
+                    let mut context = empty_plugin_context(correlation_id);
+                    context.workspace_label = Some(lane.name.clone());
+                    context.workspace_cwd = Some(lane.path.clone());
+                    context
+                }),
+            EventData::LaneDestroyed { workspace_id, .. } => workspace_id
+                .as_ref()
+                .and_then(|workspace_id| {
+                    self.plugin_context_for_workspace_id(workspace_id, correlation_id)
+                })
+                .unwrap_or_else(|| {
+                    let mut context = empty_plugin_context(correlation_id);
+                    context.workspace_id = workspace_id.clone();
+                    context
+                }),
         }
     }
 

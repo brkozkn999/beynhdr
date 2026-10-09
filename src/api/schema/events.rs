@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use super::bus::BusMessage;
 use super::common::{AgentStatus, ReadSource};
+use super::lanes::LaneInfo;
 use super::panes::{PaneInfo, PaneReadResult, PaneScrollInfo};
 use super::tabs::TabInfo;
 use super::workspaces::WorkspaceInfo;
@@ -88,6 +89,14 @@ pub enum Subscription {
     /// follow-up `bus.list`.
     #[serde(rename = "bus.message")]
     BusMessage {},
+    /// Fires when a `lane.create` request completed and the lane record was
+    /// registered. Carries the same `LaneInfo` as the response.
+    #[serde(rename = "lane.created")]
+    LaneCreated {},
+    /// Fires when a `lane.destroy` request completed and the lane record was
+    /// dropped from the registry.
+    #[serde(rename = "lane.destroyed")]
+    LaneDestroyed {},
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
@@ -225,6 +234,8 @@ pub enum EventKind {
     PaneAgentStatusChanged,
     LayoutUpdated,
     BusMessage,
+    LaneCreated,
+    LaneDestroyed,
 }
 
 impl EventKind {
@@ -257,6 +268,8 @@ impl EventKind {
             EventKind::PaneAgentStatusChanged => "pane.agent_status_changed",
             EventKind::LayoutUpdated => "layout.updated",
             EventKind::BusMessage => "bus.message",
+            EventKind::LaneCreated => "lane.created",
+            EventKind::LaneDestroyed => "lane.destroyed",
         }
     }
 }
@@ -290,6 +303,8 @@ pub const KNOWN_EVENT_KINDS: &[EventKind] = &[
     EventKind::PaneAgentStatusChanged,
     EventKind::LayoutUpdated,
     EventKind::BusMessage,
+    EventKind::LaneCreated,
+    EventKind::LaneDestroyed,
 ];
 
 pub const PLUGIN_HOOK_EVENT_KINDS: &[EventKind] = &[
@@ -318,6 +333,9 @@ pub const PLUGIN_HOOK_EVENT_KINDS: &[EventKind] = &[
     // Bus messages are discrete, bounded (64/mailbox) signals between agents
     // and plugins, so they are hookable unlike output-volume events.
     EventKind::BusMessage,
+    // Lane lifecycle transitions are discrete orchestration signals.
+    EventKind::LaneCreated,
+    EventKind::LaneDestroyed,
 ];
 
 #[cfg(test)]
@@ -571,5 +589,20 @@ pub enum EventData {
         message: BusMessage,
         /// Recipient mailbox depth after the enqueue.
         pending: u32,
+    },
+    /// A `lane.create` request completed; carries the same lane info as the
+    /// `lane.create` response.
+    LaneCreated {
+        lane: Box<LaneInfo>,
+    },
+    /// A `lane.destroy` request completed; carries the same fields as the
+    /// `lane.destroy` response.
+    LaneDestroyed {
+        lane_id: String,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        workspace_id: Option<String>,
+        path: String,
+        branch: String,
+        branch_deleted: bool,
     },
 }

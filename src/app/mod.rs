@@ -139,8 +139,8 @@ pub struct App {
     pub(crate) pending_worktree_remove_runtime_restores: HashMap<crate::layout::PaneId, u64>,
     pub(crate) next_api_worktree_operation_id: u64,
     /// Lanes that finished `lane.create` and have not been destroyed, keyed by
-    /// lane id (`lane-N`). Runtime state — like metadata tokens it does not
-    /// persist across restarts.
+    /// lane id (`lane-N`). Persisted inside the session snapshot and restored
+    /// on startup so `lane.list`/`lane.destroy` survive restarts.
     pub(crate) lanes: HashMap<String, crate::app::api::lanes::LaneRecord>,
     /// Allocates `lane-N` identities.
     pub(crate) next_lane_id: u64,
@@ -439,6 +439,9 @@ impl App {
         let session_writer = Arc::new(std::sync::Mutex::new(crate::persist::SessionWriter::new(
             policy.restore_session && snapshot.is_none(),
         )));
+        let mut restored_lanes: HashMap<String, crate::app::api::lanes::LaneRecord> =
+            HashMap::new();
+        let mut restored_next_lane_id: u64 = 1;
         let (workspaces, active, selected) = if let Some(snap) = snapshot {
             let history = config
                 .experimental
@@ -460,6 +463,14 @@ impl App {
             );
             restored_terminals = terminals;
             restored_terminal_runtimes = terminal_runtimes.into();
+            restored_lanes = snap
+                .lanes
+                .iter()
+                .map(crate::app::api::lanes::LaneRecord::from_snapshot)
+                .map(|record| (record.lane_id.clone(), record))
+                .collect();
+            restored_next_lane_id =
+                crate::app::api::lanes::LaneRecord::next_id_after_restore(&restored_lanes);
             if ws.is_empty() {
                 crate::logging::session_restored(0, "empty");
                 (Vec::new(), None, 0)
@@ -660,8 +671,8 @@ impl App {
             pending_worktree_remove_runtime_exits: HashMap::new(),
             pending_worktree_remove_runtime_restores: HashMap::new(),
             next_api_worktree_operation_id: 1,
-            lanes: HashMap::new(),
-            next_lane_id: 1,
+            lanes: restored_lanes,
+            next_lane_id: restored_next_lane_id,
             pending_lane_creates: HashMap::new(),
             pending_lane_destroys: HashMap::new(),
             next_auto_update_check: version_check_enabled
