@@ -66,7 +66,7 @@ mod workspace;
 mod worktree;
 
 const DEFAULT_CONFIG: &str = r##"# herdr configuration
-# Place this file at ~/.config/herdr/config.toml
+# Place this file at ~/.config/beynhdr/config.toml
 
 # Show first-run notification setup on startup.
 # Missing also shows onboarding; set false after you've chosen.
@@ -233,7 +233,7 @@ const DEFAULT_CONFIG: &str = r##"# herdr configuration
 # headless_rows = 40
 
 # [worktrees]
-# directory = "~/.herdr/worktrees"
+# directory = "~/.beynhdr/worktrees"
 
 [ui]
 # Sidebar width (auto-scaled based on workspace names, this sets the default)

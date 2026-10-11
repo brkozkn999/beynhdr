@@ -12,8 +12,8 @@ The [Config reference](/docs/config-reference/) lists every setting and keybindi
 Herdr reads config from:
 
 ```text
-Linux and macOS: ~/.config/herdr/config.toml
-Windows:          %APPDATA%\herdr\config.toml
+Linux and macOS: ~/.config/beynhdr/config.toml
+Windows:          %APPDATA%\beynhdr\config.toml
 ```
 
 Run `herdr --help` to see the resolved config path for your system.
@@ -27,7 +27,7 @@ herdr --default-config
 Save it as your config if you want a complete starting point:
 
 ```bash
-herdr --default-config > ~/.config/herdr/config.toml
+herdr --default-config > ~/.config/beynhdr/config.toml
 ```
 
 If a config value is invalid, Herdr falls back to a safe default and shows a startup warning.
@@ -99,7 +99,7 @@ Set the root directory Herdr uses for Git worktree checkouts created from the si
 
 ```toml
 [worktrees]
-directory = "~/.herdr/worktrees"
+directory = "~/.beynhdr/worktrees"
 ```
 
 Herdr creates checkouts under `<directory>/<repo>/<branch-slug>`. For sibling-style checkouts, set this to a directory such as `~/Projects/herdr-worktrees`. Relative values are resolved to an absolute path when the app applies the config.
@@ -324,7 +324,7 @@ tab_bar_right = [
   { type = "hostname" },
   { type = "datetime", format = "%H:%M" },
   { type = "text", text = "prod" },
-  { type = "command", command = "~/.config/herdr/status.sh", interval_seconds = 5, timeout_seconds = 2 },
+  { type = "command", command = "~/.config/beynhdr/status.sh", interval_seconds = 5, timeout_seconds = 2 },
 ]
 tab_bar_right_separator = " · "
 ```
@@ -607,9 +607,9 @@ Logs are useful when diagnosing startup warnings, integration state, or socket A
 Common log files:
 
 ```text
-~/.config/herdr/herdr.log
-~/.config/herdr/herdr-client.log
-~/.config/herdr/herdr-server.log
+~/.config/beynhdr/herdr.log
+~/.config/beynhdr/herdr-client.log
+~/.config/beynhdr/herdr-server.log
 ```
 
 Logs rotate automatically. Include the current log and rotated siblings when reporting issues.

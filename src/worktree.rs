@@ -722,11 +722,11 @@ prunable stale
     #[test]
     fn expand_tilde_path_uses_home_when_available() {
         assert_eq!(
-            expand_tilde_path_from_env("~/.herdr/worktrees", false, |key| match key {
+            expand_tilde_path_from_env("~/.beynhdr/worktrees", false, |key| match key {
                 "HOME" => Some("/home/me".into()),
                 _ => None,
             }),
-            PathBuf::from("/home/me/.herdr/worktrees")
+            PathBuf::from("/home/me/.beynhdr/worktrees")
         );
         assert_eq!(
             expand_tilde_path_from_env("/tmp/worktrees", false, |_| None),
@@ -801,18 +801,18 @@ prunable stale
             }
         }
 
-        let default_path = expand_tilde_path_from_env("~/.herdr/worktrees", true, env);
+        let default_path = expand_tilde_path_from_env("~/.beynhdr/worktrees", true, env);
         assert_eq!(
             default_path,
-            PathBuf::from(r"C:\Users\herdr\.herdr\worktrees")
+            PathBuf::from(r"C:\Users\herdr\.beynhdr\worktrees")
         );
         assert_eq!(
             default_path.display().to_string(),
-            r"C:\Users\herdr\.herdr\worktrees"
+            r"C:\Users\herdr\.beynhdr\worktrees"
         );
         assert_eq!(
-            expand_tilde_path_from_env(r"~\.herdr\worktrees", true, env),
-            PathBuf::from(r"C:\Users\herdr\.herdr\worktrees")
+            expand_tilde_path_from_env(r"~\.beynhdr\worktrees", true, env),
+            PathBuf::from(r"C:\Users\herdr\.beynhdr\worktrees")
         );
     }
 
@@ -820,11 +820,11 @@ prunable stale
     fn default_checkout_path_appends_repo_and_branch_slug() {
         assert_eq!(
             default_checkout_path(
-                Path::new("/home/me/.herdr/worktrees"),
+                Path::new("/home/me/.beynhdr/worktrees"),
                 "herdr",
                 "worktree/brave-river",
             ),
-            PathBuf::from("/home/me/.herdr/worktrees/herdr/worktree-brave-river")
+            PathBuf::from("/home/me/.beynhdr/worktrees/herdr/worktree-brave-river")
         );
     }
 

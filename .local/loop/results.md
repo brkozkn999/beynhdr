@@ -86,3 +86,16 @@ Kalan: lane04 notify, lane09 devin-surface, lane12 plugin-gaps.
 Kalan: lane04 notify.
 - lane04 notify ✅: 3s poll→status diff→toast (NotifyIcon fallback, BurntToast yok) + needs-you.json + focus-aware susturma; E2E kanıtlı. Bulgu: bilinmeyen label'lı report-agent ~1s'de reap ediliyor → simülasyonda custom: source/known label.
 - TÜM 15 ŞERİT KAPANDI. Kendi spot-check'im: hud 8/8, stats 14/14, parse 15/15 node:test yeşil; receipt zinciri INTACT+tamper-kırılgan.
+
+## Fork dalgası (2026-10-09 gece, 4 lane paralel subagent — worktree izolasyonlu)
+- lane.create `befa5837`: atomik worktree+workspace+pane+agent + adım-bazlı rollback + lane.list/destroy + `herdr api call` CLI. 3415 test yeşil.
+- bus `709fa655`: bus.send/list/read/ack FIFO mailbox (pane-keyed, transient) + bus_message event + plugin hook. 3422 yeşil.
+- preview `c38fbbe4`: preview.open/set/close non-PTY salt-okur pane (markdown/text, layout'a katılır, restart'ta restore). 3427 yeşil. V2 gap: remote client-shell projeksiyonu boş.
+- sidebar `d90c0ac5`: sidebar.provision/.clear — plugin'ler session-scoped sidebar satırı ekliyor (config'siz). 63/63+946 test.
+- Entegrasyon: 4 merge (tek gerçek conflict: additive enum/handler satırları + generated schema). Schema `HERDR_UPDATE_API_SCHEMA=1` ile regen (`f0907962`). Final `just check` exit=0. Worktree+branch temizlendi.
+
+## Rebrand dalgasi (2026-10-10) � storage dirs .herdr -> .beynhdr
+- app_dir_name: herdr->beynhdr / herdr-dev->beynhdr-dev; worktree default ~/.herdr -> ~/.beynhdr; docs (en+ja) + dev/smoke script'ler + tests/ harness'leri uyumlu.
+- KAPSAM DI�I (kontrat): binary/CLI 'herdr', HERDR_* env, herdr.sock / herdr-client.sock, herdr-plugin.toml, log dosya adlari, installer store (%USERPROFILE%\.herdr\packages, install.ps1 upstream'a hizali kaldi).
+- Makine migrasyonu (kopya, eskiler yedek kalir): APPDATA herdr->beynhdr + herdr-dev->beynhdr-dev, LOCALAPPDATA ayni, ~/.herdr/worktrees -> ~/.beynhdr/worktrees. Debug --help dogruladi: config = %APPDATA%\beynhdr-dev\config.toml.
+- just check YESIL: 3480/3480 nextest + maintenance + bun + docs-contract.

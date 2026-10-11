@@ -12,8 +12,8 @@ Herdr は設定ファイルなしで動作します。キー、テーマ、サ�
 Herdr は次の場所から設定を読み込みます:
 
 ```text
-Linux and macOS: ~/.config/herdr/config.toml
-Windows:          %APPDATA%\herdr\config.toml
+Linux and macOS: ~/.config/beynhdr/config.toml
+Windows:          %APPDATA%\beynhdr\config.toml
 ```
 
 システム上で解決された設定ファイルのパスは、`herdr --help` で確認できます。
@@ -27,7 +27,7 @@ herdr --default-config
 完全な出発点が欲しい場合は、これを設定として保存してください:
 
 ```bash
-herdr --default-config > ~/.config/herdr/config.toml
+herdr --default-config > ~/.config/beynhdr/config.toml
 ```
 
 設定値が無効な場合、Herdr は安全なデフォルト値にフォールバックし、起動時に警告を表示します。
@@ -99,7 +99,7 @@ new_cwd = "follow"
 
 ```toml
 [worktrees]
-directory = "~/.herdr/worktrees"
+directory = "~/.beynhdr/worktrees"
 ```
 
 Herdr は `<directory>/<repo>/<branch-slug>` の下にチェックアウトを作成します。隣接ディレクトリ方式のチェックアウトには、`~/Projects/herdr-worktrees` のようなディレクトリを設定してください。相対値は、アプリが設定を適用するときに絶対パスへ解決されます。
@@ -320,7 +320,7 @@ tab_bar_right = [
   { type = "hostname" },
   { type = "datetime", format = "%H:%M" },
   { type = "text", text = "prod" },
-  { type = "command", command = "~/.config/herdr/status.sh", interval_seconds = 5, timeout_seconds = 2 },
+  { type = "command", command = "~/.config/beynhdr/status.sh", interval_seconds = 5, timeout_seconds = 2 },
 ]
 tab_bar_right_separator = " · "
 ```
@@ -600,9 +600,9 @@ Windows でのサポートは現時点で韓国語 IME に限定されていま�
 主なログファイル:
 
 ```text
-~/.config/herdr/herdr.log
-~/.config/herdr/herdr-client.log
-~/.config/herdr/herdr-server.log
+~/.config/beynhdr/herdr.log
+~/.config/beynhdr/herdr-client.log
+~/.config/beynhdr/herdr-server.log
 ```
 
 ログは自動的にローテーションされます。問題を報告するときは、現在のログとローテーションされた関連ファイルを含めてください。
